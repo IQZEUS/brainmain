@@ -2,19 +2,23 @@ window.BANNER_DATA = {
   "en": {
     "title": "📢 New Version Available",
     "sub": "Second Brain v2.0 is here!",
-    "html": "<div style='padding:16px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:12px;text-align:center;'><p style='margin-top:12px;color:#eae7de;font-size:15px;'>✨ New features: smarter graph, offline support, and more!</p></div>",
+    "image": "",
+    "content": "",
+    "html": "<div style=\"display:flex;flex-direction:column;align-items:center;gap:10px;\"></div>",
     "button": {
       "label": "📥 Downlییییاااااااااااااااااااااااااااااااایoad Now",
       "link": "https://github.com/IQZEUS/brainmain"
     }
   },
   "fa": {
-    "title": "📢 نسخه جدید میاااااااااااااااااااااااااااایییینتشر شد",
-    "sub": "مغز نسخه ۲ منتشر شد!",
-    "html": "<div style='padding:16px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:12px;text-align:center;'><p style='margin-top:12px;color:#eae7de;font-size:15px;'>✨ امکانات جدید: گراف هوشمندتر، پشتیبانی آفلاین و موارد دیگر!</p></div>",
+    "title": "سلام",
+    "sub": "مغز دو منتشر شد",
+    "image": "https://cdn.schoolspecialty.com/56f76621-1f51-4a5b-9111-b0f1002a7860/586282_JPG%20Output.jpg",
+    "content": "کلیک کنید",
+    "html": "<div style=\"display:flex;flex-direction:column;align-items:center;gap:10px;\"><img src=\"https://cdn.schoolspecialty.com/56f76621-1f51-4a5b-9111-b0f1002a7860/586282_JPG%20Output.jpg\" alt=\"banner\" style=\"max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;\"><div style=\"color:#c9c6bd;font-size:14px;line-height:1.8;\">کلیک کنید</div></div>",
     "button": {
-      "label": "📥 دانلود نسخه جدید",
-      "link": "https://github.com/IQZEUS/brainmain"
+      "label": "📥 دانلود نسخه جدید یسسس",
+      "link": "ددددددددددددددددددhttps://github.com/IQZEUS/brainmain"
     }
   }
 };
