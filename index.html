@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ===== META TAGS TO PREVENT CACHING ===== -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Second Brain · مغز دوم</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js">
-    </script>
     <style>
         /* ===== RESET & BASE ===== */
         * {
@@ -60,38 +59,6 @@
             font-size: 12px;
             color: #5f5d6b;
             min-height: 16px;
-        }
-        .ln-node {
-            animation: nodePulse 1.8s ease-in-out infinite;
-        }
-        .ln-edge {
-            stroke-dasharray: 60;
-            stroke-dashoffset: 60;
-            animation: drawEdge 1.6s ease forwards infinite;
-        }
-        @keyframes nodePulse {
-            0%,
-            100% {
-                opacity: .45;
-                r: 3;
-            }
-            50% {
-                opacity: 1;
-                r: 5;
-            }
-        }
-        @keyframes drawEdge {
-            0% {
-                stroke-dashoffset: 60;
-                opacity: 0;
-            }
-            40% {
-                opacity: 1;
-            }
-            100% {
-                stroke-dashoffset: 0;
-                opacity: .15;
-            }
         }
 
         /* ===== OVERLAY PAGES ===== */
@@ -233,12 +200,6 @@
             color: #5f5d6b;
             font-size: 13px;
         }
-        .banner-area .banner-text {
-            color: #c9c6bd;
-            font-size: 14px;
-            line-height: 1.7;
-            margin-top: 6px;
-        }
         .banner-actions {
             display: flex;
             gap: 10px;
@@ -315,6 +276,35 @@
             }
         }
 
+        /* ===== LANGUAGE SWITCHER (shared) ===== */
+        .lang-switcher {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 14px;
+        }
+        .lang-switcher button {
+            background: transparent;
+            border: 1px solid #323242;
+            color: #8d8a9a;
+            padding: 4px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            transition: .15s;
+        }
+        .lang-switcher button.active {
+            background: #d6a35c;
+            color: #0e0e14;
+            border-color: #d6a35c;
+            font-weight: 600;
+        }
+        .lang-switcher button:hover:not(.active) {
+            border-color: #d6a35c;
+            color: #eae7de;
+        }
+
         /* ===== MAIN APP ===== */
         #appRoot {
             display: none;
@@ -353,6 +343,10 @@
                 right: auto;
                 left: 12px;
             }
+            .lang-switcher button {
+                font-size: 12px;
+                padding: 3px 12px;
+            }
         }
     </style>
 </head>
@@ -360,20 +354,15 @@
 
     <!-- ===== LOADING SCREEN ===== -->
     <div id="loadingScreen">
-        <svg viewBox="0 0 220 160" width="180" height="130">
-            <g id="loadLines" fill="none" stroke="#3a3a4d" stroke-width="1.2"></g>
-            <g id="loadNodes"></g>
-        </svg>
         <div class="load-brand">Second Brain</div>
         <div class="load-msg" id="loadMsg">Waking up…</div>
     </div>
 
-    <!-- ===== OVERLAY: تنظیمات اولیه (یکبار) ===== -->
+    <!-- ===== OVERLAY: SETTINGS ===== -->
     <div class="overlay-page" id="settingsPage">
         <div class="overlay-card">
             <h2 id="settingsTitle">⚙️ Initial Setup</h2>
             <p id="settingsDesc">Choose your preferences. This page appears only once.</p>
-
             <div class="settings-row">
                 <span class="label" id="themeLabel">🌓 Theme</span>
                 <div class="options" id="themeOptions">
@@ -381,7 +370,6 @@
                     <button data-value="light">Light</button>
                 </div>
             </div>
-
             <div class="settings-row">
                 <span class="label" id="langLabel">🌐 Language</span>
                 <div class="options" id="langOptions">
@@ -389,18 +377,16 @@
                     <button data-value="fa">فارسی</button>
                 </div>
             </div>
-
             <button class="settings-submit" id="settingsSubmit">✅ Continue</button>
         </div>
     </div>
 
-    <!-- ===== OVERLAY: صفحه تبلیغات (از گیت) ===== -->
+    <!-- ===== OVERLAY: BANNER ===== -->
     <div class="overlay-page" id="bannerPage">
         <div class="overlay-card">
-            <a class="close-banner" id="closeBannerBtn" href="https://github.com/IQZEUS/brainmain/tree/main" target="_blank">✕</a>
+            <a class="close-banner" id="closeBannerBtn" href="index2.html">✕</a>
             <h2 id="bannerTitle">📢 Announcement</h2>
             <p id="bannerSub" style="font-size:13px;color:#8d8a9a;">Latest news & updates</p>
-
             <div class="banner-area" id="bannerArea">
                 <div id="bannerLoader" class="banner-loader">
                     <div class="spinner"></div>
@@ -408,14 +394,17 @@
                 </div>
                 <div id="bannerContent" style="display:none;"></div>
             </div>
-
             <div class="banner-actions">
                 <button class="btn btn-primary" id="bannerActionBtn">📖 View</button>
+            </div>
+            <div class="lang-switcher">
+                <button id="langEn" class="active">English</button>
+                <button id="langFa">فارسی</button>
             </div>
         </div>
     </div>
 
-    <!-- ===== برنامه اصلی ===== -->
+    <!-- ===== MAIN APP ===== -->
     <div id="appRoot">
         <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#5f5d6b;font-size:18px;flex-direction:column;gap:12px;">
             <div style="font-size:48px;">🧠</div>
@@ -431,85 +420,17 @@
             // ================================================================
             //  1.  LOADING SCREEN
             // ================================================================
-            function buildLoadingGraphic() {
-                const pts = [
-                    [110, 30],
-                    [45, 70],
-                    [175, 70],
-                    [30, 125],
-                    [110, 110],
-                    [190, 125],
-                    [110, 150]
-                ];
-                const edges = [
-                    [0, 1],
-                    [0, 2],
-                    [1, 3],
-                    [1, 4],
-                    [2, 4],
-                    [2, 5],
-                    [4, 6],
-                    [4, 3],
-                    [4, 5]
-                ];
-                const colors = ['#d6a35c', '#6fb3a0', '#9382d6', '#6fb3a0', '#d6a35c', '#9382d6', '#6fb3a0'];
-                const lg = document.getElementById('loadLines');
-                const ng = document.getElementById('loadNodes');
-                edges.forEach(([a, b], i) => {
-                    const [x1, y1] = pts[a],
-                        [x2, y2] = pts[b];
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                    line.setAttribute('x1', x1);
-                    line.setAttribute('y1', y1);
-                    line.setAttribute('x2', x2);
-                    line.setAttribute('y2', y2);
-                    line.setAttribute('class', 'ln-edge');
-                    line.style.animationDelay = (i * 0.12) + 's';
-                    lg.appendChild(line);
-                });
-                pts.forEach((p, i) => {
-                    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    c.setAttribute('cx', p[0]);
-                    c.setAttribute('cy', p[1]);
-                    c.setAttribute('r', 4);
-                    c.setAttribute('fill', colors[i % colors.length]);
-                    c.setAttribute('class', 'ln-node');
-                    c.style.animationDelay = (i * 0.15) + 's';
-                    ng.appendChild(c);
-                });
-            }
-            buildLoadingGraphic();
-
             const loadMsgEl = document.getElementById('loadMsg');
-            const loadingMessages = {
-                en: ['Waking up Second Brain…', 'Loading notes…', 'Building connections…', 'Preparing graph…',
-                    'Final touches…'
-                ],
-                fa: ['در حال بیدار شدن مغز دوم…', 'بارگذاری یادداشت‌ها…', 'ساخت ارتباط بین ایده‌ها…', 'آماده‌سازی گراف دانش…',
-                    'چیدن آخرین تکه‌ها…'
-                ]
-            };
+            const loadingMessages = ['Waking up…', 'Loading banner…', 'Almost ready…'];
             let msgIdx = 0;
-            let currentLang = 'en';
-
-            function getLoadMessages(lang) {
-                return loadingMessages[lang] || loadingMessages.en;
-            }
-
-            function updateLoadingMessage(lang) {
-                const msgs = getLoadMessages(lang);
-                loadMsgEl.textContent = msgs[msgIdx % msgs.length];
-            }
-
             const msgInterval = setInterval(() => {
-                const msgs = getLoadMessages(currentLang);
-                msgIdx = (msgIdx + 1) % msgs.length;
+                msgIdx = (msgIdx + 1) % loadingMessages.length;
                 loadMsgEl.style.opacity = 0;
                 setTimeout(() => {
-                    loadMsgEl.textContent = msgs[msgIdx];
+                    loadMsgEl.textContent = loadingMessages[msgIdx];
                     loadMsgEl.style.opacity = 1;
                 }, 200);
-            }, 750);
+            }, 600);
 
             function hideLoading() {
                 clearInterval(msgInterval);
@@ -517,7 +438,7 @@
             }
 
             // ================================================================
-            //  2.  SETTINGS (one-time)
+            //  2.  SETTINGS
             // ================================================================
             const SETTINGS_KEY = 'second-brain-settings-v1';
 
@@ -555,6 +476,15 @@
                 }
             };
 
+            let selectedTheme = 'dark';
+            let selectedLang = 'en';
+
+            const stored = getStoredSettings();
+            if (stored && stored.configured) {
+                selectedTheme = stored.theme || 'dark';
+                selectedLang = stored.lang || 'en';
+            }
+
             function updateSettingsUI(lang) {
                 const t = settingsI18n[lang] || settingsI18n.en;
                 document.getElementById('settingsTitle').textContent = t.title;
@@ -562,20 +492,15 @@
                 document.getElementById('themeLabel').textContent = t.theme;
                 document.getElementById('langLabel').textContent = t.lang;
                 settingsSubmit.textContent = t.continue;
-                currentLang = lang;
-                const msgs = getLoadMessages(lang);
-                loadMsgEl.textContent = msgs[0];
             }
 
-            let selectedTheme = 'dark';
-            let selectedLang = 'en';
+            updateSettingsUI(selectedLang);
 
-            // default: English, Dark
             langBtns.forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.value === 'en');
+                btn.classList.toggle('active', btn.dataset.value === selectedLang);
             });
             themeBtns.forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.value === 'dark');
+                btn.classList.toggle('active', btn.dataset.value === selectedTheme);
             });
 
             themeBtns.forEach(btn => {
@@ -607,7 +532,6 @@
                 applyTheme(selectedTheme);
                 applyLang(selectedLang);
                 settingsPage.classList.remove('show');
-                // after settings, show banner
                 showBannerPage(selectedLang);
             });
 
@@ -628,12 +552,20 @@
             function applyLang(lang) {
                 document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
                 document.documentElement.lang = lang;
-                currentLang = lang;
-                updateSettingsUI(lang);
+                if (settingsPage.classList.contains('show')) {
+                    updateSettingsUI(lang);
+                }
+                document.querySelectorAll('.lang-switcher button, #langOptions button').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.value === lang || btn.id === 'lang' + lang.charAt(0)
+                        .toUpperCase() + lang.slice(1));
+                });
+                if (bannerPage.classList.contains('show')) {
+                    fetchBanner(lang);
+                }
             }
 
             // ================================================================
-            //  3.  BANNER — always fetch fresh, ignore cache
+            //  3.  BANNER — ALWAYS FETCH FROM GITHUB, NEVER FROM CACHE
             // ================================================================
             const bannerPage = document.getElementById('bannerPage');
             const bannerContent = document.getElementById('bannerContent');
@@ -642,8 +574,10 @@
             const bannerSub = document.getElementById('bannerSub');
             const bannerActionBtn = document.getElementById('bannerActionBtn');
 
+            // 🔥 Your exact GitHub raw URL
             const BANNER_URL = 'https://raw.githubusercontent.com/IQZEUS/brainmain/refs/heads/main/banner.json';
 
+            // Fallback default (only used if network is completely down)
             const defaultBanner = {
                 en: {
                     title: '📢 Announcement',
@@ -661,98 +595,157 @@
 
             let isBannerLoading = false;
 
+            // ================================================================
+            //  RENDER — updates ALL elements from data
+            // ================================================================
             function renderBanner(lang, data) {
                 if (!data) {
                     data = defaultBanner[lang] || defaultBanner.en;
                 }
-                // update all elements from JSON data
+
+                // 🔥 UPDATE every single part from JSON
                 bannerTitle.textContent = data.title || '📢 Announcement';
                 bannerSub.textContent = data.sub || 'Latest news & updates';
                 bannerContent.innerHTML = data.html || '<div class="placeholder-banner">No content</div>';
+
                 const btn = data.button || { label: '📖 View', link: '#' };
                 bannerActionBtn.textContent = btn.label || '📖 View';
                 bannerActionBtn.onclick = () => {
                     if (btn.link && btn.link !== '#') window.open(btn.link, '_blank');
                     else alert('No link configured.');
                 };
-                // show content, hide loader
+
+                // Show content, hide loader
                 bannerLoader.style.display = 'none';
                 bannerContent.style.display = 'block';
+
+                console.log('✅ Banner rendered from GitHub data at:', new Date().toLocaleTimeString());
             }
 
+            // ================================================================
+            //  FETCH — ALWAYS FRESH, ignores all caches
+            // ================================================================
             async function fetchBanner(lang) {
                 if (isBannerLoading) return;
                 isBannerLoading = true;
 
-                // show loader, hide content
+                // Show loader, hide content
                 bannerLoader.style.display = 'flex';
                 bannerContent.style.display = 'none';
 
                 try {
-                    // Always fetch fresh with cache-busting timestamp
-                    const cacheBuster = '?t=' + Date.now();
+                    // 🔥🔥🔥 TRIPLE CACHE-BUSTING:
+                    // 1. Timestamp (ms)
+                    // 2. Random string
+                    // 3. Unique request ID
+                    const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
+                    const cacheBuster = '?t=' + Date.now() + '&r=' + Math.random().toString(36).substring(2, 10) +
+                        '&id=' + uniqueId;
+
                     const response = await fetch(BANNER_URL + cacheBuster, {
                         method: 'GET',
+                        cache: 'reload', // forces browser to bypass cache
                         headers: {
                             'Cache-Control': 'no-cache, no-store, must-revalidate',
                             'Pragma': 'no-cache',
                             'Expires': '0'
                         }
                     });
+
                     if (!response.ok) throw new Error('HTTP ' + response.status);
+
                     const json = await response.json();
-                    // store in cache for offline fallback (but we don't rely on it)
+                    console.log('📥 Fresh data received from GitHub at:', new Date().toLocaleTimeString());
+
+                    // Store in localStorage only as backup for offline
                     localStorage.setItem('banner-cache', JSON.stringify(json));
+
                     const data = json[lang] || json.en;
                     if (data) {
                         renderBanner(lang, data);
                     } else {
+                        console.warn('No data for language:', lang);
                         renderBanner(lang, defaultBanner[lang] || defaultBanner.en);
                     }
-                } catch (e) {
-                    console.warn('Failed to fetch banner from GitHub:', e);
-                    // fallback to cache if available, else default
+
+                } catch (error) {
+                    console.warn('❌ Network error fetching from GitHub:', error);
+
+                    // ⚠️ Only fallback to cache if network is down
                     try {
                         const cached = localStorage.getItem('banner-cache');
                         if (cached) {
                             const parsed = JSON.parse(cached);
                             const data = parsed[lang] || parsed.en;
                             if (data) {
+                                console.log('📦 Using cached data (network unavailable)');
                                 renderBanner(lang, data);
                                 isBannerLoading = false;
                                 return;
                             }
                         }
                     } catch (_) {}
+
+                    // Final fallback
                     renderBanner(lang, defaultBanner[lang] || defaultBanner.en);
                 }
+
                 isBannerLoading = false;
             }
 
+            // ================================================================
+            //  SHOW BANNER PAGE
+            // ================================================================
             function showBannerPage(lang) {
                 bannerPage.classList.add('show');
-                // start fetching immediately
+                // Update language switcher buttons
+                document.querySelectorAll('.lang-switcher button').forEach(btn => {
+                    btn.classList.toggle('active', (btn.id === 'langEn' && lang === 'en') || (btn.id === 'langFa' &&
+                        lang === 'fa'));
+                });
                 fetchBanner(lang);
             }
 
             // ================================================================
-            //  4.  INIT
+            //  4.  LANGUAGE SWITCHER (shared)
+            // ================================================================
+            document.getElementById('langEn').addEventListener('click', function() {
+                if (selectedLang === 'en') return;
+                selectedLang = 'en';
+                applyLang('en');
+                if (settingsPage.classList.contains('show')) {
+                    langBtns.forEach(b => b.classList.toggle('active', b.dataset.value === 'en'));
+                }
+                const settings = getStoredSettings() || { theme: selectedTheme, lang: 'en', configured: true };
+                settings.lang = 'en';
+                saveSettings(settings);
+            });
+
+            document.getElementById('langFa').addEventListener('click', function() {
+                if (selectedLang === 'fa') return;
+                selectedLang = 'fa';
+                applyLang('fa');
+                if (settingsPage.classList.contains('show')) {
+                    langBtns.forEach(b => b.classList.toggle('active', b.dataset.value === 'fa'));
+                }
+                const settings = getStoredSettings() || { theme: selectedTheme, lang: 'fa', configured: true };
+                settings.lang = 'fa';
+                saveSettings(settings);
+            });
+
+            // ================================================================
+            //  5.  INIT
             // ================================================================
             (async function init() {
-                // show loading screen for at least 1.5s for smooth transition
                 await new Promise(r => setTimeout(r, 1500));
                 hideLoading();
 
                 const settings = getStoredSettings();
                 if (!settings || !settings.configured) {
-                    // first time → show settings
-                    updateSettingsUI('en');
                     settingsPage.classList.add('show');
                 } else {
-                    // apply saved settings
                     applyTheme(settings.theme || 'dark');
                     applyLang(settings.lang || 'en');
-                    // show banner
                     showBannerPage(settings.lang || 'en');
                 }
             })();
