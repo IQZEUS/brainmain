@@ -1,3437 +1,769 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Second Brain · مغز دوم</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js">
-</script>
-<style>
-  /* ===== BASE ===== */
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-  html,
-  body {
-    height: 100%;
-    background: #0e0e14;
-    color: #eae7de;
-    font-family: 'Segoe UI', 'Vazirmatn', sans-serif;
-    font-size: 15px;
-    overflow: hidden;
-  }
-  body {
-    display: flex;
-    flex-direction: column;
-  }
-  :root {
-    --bg: #0e0e14;
-    --surface: #16161e;
-    --surface-2: #1e1e28;
-    --surface-3: #282834;
-    --border: #323242;
-    --text: #eae7de;
-    --text-dim: #8d8a9a;
-    --text-faint: #5f5d6b;
-    --accent: #d6a35c;
-    --accent-dim: #a67f47;
-    --link: #6fb3a0;
-    --link-dim: #4d7f72;
-    --violet: #9382d6;
-    --danger: #cf6f6f;
-    --radius: 12px;
-    --font: 'Vazirmatn', sans-serif;
-    --mono: 'IBM Plex Mono', monospace;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Second Brain · مغز دوم</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js">
+    </script>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html,
+        body {
+            height: 100%;
+            background: #0e0e14;
+            color: #eae7de;
+            font-family: 'Segoe UI', 'Vazirmatn', sans-serif;
+            font-size: 15px;
+            overflow: hidden;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
 
-  /* ===== LOADING SCREEN ===== */
-  #loadingScreen {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 18px;
-    transition: opacity .45s ease, visibility .45s ease;
-  }
-  #loadingScreen.hide {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-  .load-brand {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 20px;
-    letter-spacing: .5px;
-    color: var(--text);
-  }
-  .load-msg {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text-faint);
-    min-height: 16px;
-  }
-  .ln-node {
-    animation: nodePulse 1.8s ease-in-out infinite;
-  }
-  .ln-edge {
-    stroke-dasharray: 60;
-    stroke-dashoffset: 60;
-    animation: drawEdge 1.6s ease forwards infinite;
-  }
-  @keyframes nodePulse {
-    0%,
-    100% {
-      opacity: .45;
-      r: 3;
-    }
-    50% {
-      opacity: 1;
-      r: 5;
-    }
-  }
-  @keyframes drawEdge {
-    0% {
-      stroke-dashoffset: 60;
-      opacity: 0;
-    }
-    40% {
-      opacity: 1;
-    }
-    100% {
-      stroke-dashoffset: 0;
-      opacity: .15;
-    }
-  }
+        /* ===== LOADING SCREEN ===== */
+        #loadingScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #0e0e14;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            transition: opacity .55s ease, visibility .55s ease;
+        }
+        #loadingScreen.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .load-brand {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            font-size: 20px;
+            letter-spacing: .5px;
+            color: #eae7de;
+        }
+        .load-msg {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: #5f5d6b;
+            min-height: 16px;
+        }
+        .ln-node {
+            animation: nodePulse 1.8s ease-in-out infinite;
+        }
+        .ln-edge {
+            stroke-dasharray: 60;
+            stroke-dashoffset: 60;
+            animation: drawEdge 1.6s ease forwards infinite;
+        }
+        @keyframes nodePulse {
+            0%,
+            100% {
+                opacity: .45;
+                r: 3;
+            }
+            50% {
+                opacity: 1;
+                r: 5;
+            }
+        }
+        @keyframes drawEdge {
+            0% {
+                stroke-dashoffset: 60;
+                opacity: 0;
+            }
+            40% {
+                opacity: 1;
+            }
+            100% {
+                stroke-dashoffset: 0;
+                opacity: .15;
+            }
+        }
 
-  /* ===== OVERLAY PAGES ===== */
-  .overlay-page {
-    position: fixed;
-    inset: 0;
-    z-index: 8000;
-    background: rgba(14, 14, 20, 0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    transition: opacity .35s ease, transform .35s ease;
-    opacity: 0;
-    transform: scale(0.97);
-    pointer-events: none;
-  }
-  .overlay-page.show {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
-  }
-  .overlay-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px 36px;
-    max-width: 520px;
-    width: 100%;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-  }
-  .overlay-card h2 {
-    font-family: 'Fraunces', serif;
-    font-size: 24px;
-    margin-bottom: 12px;
-    color: var(--text);
-    text-align: center;
-  }
-  .overlay-card p {
-    color: var(--text-dim);
-    font-size: 14px;
-    line-height: 1.8;
-    text-align: center;
-    margin-bottom: 20px;
-  }
+        /* ===== OVERLAY PAGES ===== */
+        .overlay-page {
+            position: fixed;
+            inset: 0;
+            z-index: 8000;
+            background: rgba(14, 14, 20, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: opacity .4s ease, transform .4s ease;
+            opacity: 0;
+            transform: scale(0.97);
+            pointer-events: none;
+        }
+        .overlay-page.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+        .overlay-card {
+            background: #1a1a24;
+            border: 1px solid #323242;
+            border-radius: 20px;
+            padding: 32px 36px;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .overlay-card h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: #eae7de;
+            text-align: center;
+        }
+        .overlay-card p {
+            color: #8d8a9a;
+            font-size: 14px;
+            line-height: 1.8;
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-  /* ===== SETTINGS PAGE ===== */
-  .settings-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .settings-row .label {
-    font-weight: 500;
-    color: var(--text);
-    font-size: 14px;
-  }
-  .settings-row .options {
-    display: flex;
-    gap: 6px;
-    background: var(--surface-2);
-    border-radius: 30px;
-    padding: 3px;
-    border: 1px solid var(--border);
-  }
-  .settings-row .options button {
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    font-size: 13px;
-    padding: 6px 16px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: .15s;
-  }
-  .settings-row .options button.active {
-    background: var(--accent);
-    color: #0e0e14;
-    font-weight: 600;
-    box-shadow: 0 2px 12px rgba(214, 163, 92, 0.3);
-  }
-  .settings-row .options button:hover:not(.active) {
-    color: var(--text);
-  }
-  .settings-submit {
-    width: 100%;
-    margin-top: 16px;
-    background: var(--accent);
-    color: #0e0e14;
-    border: none;
-    border-radius: 14px;
-    padding: 14px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    transition: .15s;
-  }
-  .settings-submit:hover {
-    background: #e2b06f;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(214, 163, 92, 0.3);
-  }
+        /* ===== SETTINGS PAGE ===== */
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #2a2a38;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .settings-row .label {
+            font-weight: 500;
+            color: #c9c6bd;
+            font-size: 14px;
+        }
+        .settings-row .options {
+            display: flex;
+            gap: 6px;
+            background: #1e1e28;
+            border-radius: 30px;
+            padding: 3px;
+            border: 1px solid #323242;
+        }
+        .settings-row .options button {
+            background: transparent;
+            border: none;
+            color: #8d8a9a;
+            font-size: 13px;
+            padding: 6px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: .15s;
+        }
+        .settings-row .options button.active {
+            background: #d6a35c;
+            color: #0e0e14;
+            font-weight: 600;
+            box-shadow: 0 2px 12px rgba(214, 163, 92, 0.3);
+        }
+        .settings-row .options button:hover:not(.active) {
+            color: #eae7de;
+        }
+        .settings-submit {
+            width: 100%;
+            margin-top: 16px;
+            background: #d6a35c;
+            color: #0e0e14;
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: .15s;
+        }
+        .settings-submit:hover {
+            background: #e2b06f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(214, 163, 92, 0.3);
+        }
 
-  /* ===== BANNER PAGE ===== */
-  .banner-area {
-    margin: 12px 0 18px;
-    border-radius: 16px;
-    overflow: hidden;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    min-height: 140px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 20px;
-    text-align: center;
-  }
-  .banner-area img {
-    max-width: 100%;
-    max-height: 200px;
-    object-fit: contain;
-    border-radius: 8px;
-  }
-  .banner-area .placeholder-banner {
-    color: var(--text-faint);
-    font-size: 13px;
-  }
-  .banner-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 14px;
-    justify-content: center;
-  }
-  .banner-actions .btn {
-    padding: 10px 28px;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    font-family: inherit;
-    transition: .15s;
-  }
-  .banner-actions .btn-primary {
-    background: var(--accent);
-    color: #0e0e14;
-  }
-  .banner-actions .btn-primary:hover {
-    background: #e2b06f;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(214, 163, 92, 0.3);
-  }
-  .banner-actions .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-  }
-  .banner-actions .btn-ghost:hover {
-    border-color: var(--text-dim);
-    color: var(--text);
-  }
-  .close-banner {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: transparent;
-    border: none;
-    color: var(--text-faint);
-    font-size: 24px;
-    cursor: pointer;
-    transition: .15s;
-    line-height: 1;
-    z-index: 10;
-  }
-  .close-banner:hover {
-    color: var(--danger);
-    transform: rotate(90deg);
-  }
-  [dir="rtl"] .close-banner {
-    right: auto;
-    left: 16px;
-  }
+        /* ===== BANNER / AD PAGE ===== */
+        .banner-area {
+            margin: 12px 0 18px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #1e1e28;
+            border: 1px solid #323242;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+            text-align: center;
+            transition: .2s;
+            position: relative;
+        }
+        .banner-area img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .banner-area .placeholder-banner {
+            color: #5f5d6b;
+            font-size: 13px;
+        }
+        .banner-area .banner-text {
+            color: #c9c6bd;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-top: 6px;
+        }
+        .banner-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            justify-content: center;
+        }
+        .banner-actions .btn {
+            padding: 10px 28px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            transition: .15s;
+        }
+        .banner-actions .btn-primary {
+            background: #d6a35c;
+            color: #0e0e14;
+        }
+        .banner-actions .btn-primary:hover {
+            background: #e2b06f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(214, 163, 92, 0.3);
+        }
 
-  /* ===== TOP BAR ===== */
-  .topbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 16px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    flex-shrink: 0;
-    flex-wrap: wrap;
-  }
-  .brand {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 18px;
-    letter-spacing: .3px;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .brand .dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 3px rgba(214, 163, 92, .18);
-  }
-  .stats {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-faint);
-    margin-inline-start: auto;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-  .viewbtns {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-  }
-  .viewbtn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    font-size: 12px;
-    padding: 5px 12px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-family: inherit;
-    transition: .15s;
-    white-space: nowrap;
-  }
-  .viewbtn:hover {
-    border-color: var(--accent-dim);
-    color: var(--text);
-  }
-  .viewbtn.active {
-    background: var(--accent);
-    color: #241a0c;
-    border-color: var(--accent);
-    font-weight: 600;
-  }
-  .lang-switch {
-    display: flex;
-    gap: 2px;
-    background: var(--surface-2);
-    border-radius: 20px;
-    padding: 2px;
-    border: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .lang-switch button {
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 18px;
-    cursor: pointer;
-    font-family: var(--mono);
-    font-weight: 500;
-    transition: .15s;
-  }
-  .lang-switch button.active {
-    background: var(--accent);
-    color: #241a0c;
-    box-shadow: 0 2px 8px rgba(214, 163, 92, .3);
-  }
-  .settings-gear {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: .15s;
-    flex-shrink: 0;
-  }
-  .settings-gear:hover {
-    border-color: var(--accent-dim);
-    color: var(--text);
-  }
-  .hamburger {
-    display: none;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    font-size: 15px;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
+        .close-banner {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            color: #5f5d6b;
+            font-size: 24px;
+            cursor: pointer;
+            transition: .15s;
+            line-height: 1;
+            z-index: 10;
+            text-decoration: none;
+        }
+        .close-banner:hover {
+            color: #cf6f6f;
+            transform: rotate(90deg);
+        }
+        [dir="rtl"] .close-banner {
+            right: auto;
+            left: 16px;
+        }
 
-  /* ===== LAYOUT ===== */
-  .layout {
-    flex: 1;
-    display: flex;
-    min-height: 0;
-  }
+        /* ===== BANNER LOADING SPINNER ===== */
+        .banner-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .banner-loader .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(214, 163, 92, 0.15);
+            border-top-color: #d6a35c;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .banner-loader .spinner-text {
+            color: #8d8a9a;
+            font-size: 13px;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
-  /* ===== SIDEBAR ===== */
-  .sidebar {
-    width: 280px;
-    flex-shrink: 0;
-    background: var(--surface);
-    border-inline-end: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-  .sidebar-head {
-    padding: 12px 14px 8px;
-    flex-shrink: 0;
-  }
-  .search-box {
-    width: 100%;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: var(--radius);
-    padding: 8px 12px;
-    font-size: 13px;
-    font-family: inherit;
-  }
-  .search-box:focus {
-    outline: none;
-    border-color: var(--accent-dim);
-  }
-  .new-note-btn {
-    width: 100%;
-    margin-top: 6px;
-    background: var(--accent);
-    color: #241a0c;
-    border: none;
-    border-radius: var(--radius);
-    padding: 8px 12px;
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: .15s;
-  }
-  .new-note-btn:hover {
-    background: #e2b06f;
-  }
-  .backup-row {
-    display: flex;
-    gap: 6px;
-    margin-top: 6px;
-  }
-  .backup-btn {
-    flex: 1;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    border-radius: 8px;
-    padding: 6px 5px;
-    font-size: 10.5px;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .backup-btn:hover {
-    border-color: var(--link-dim);
-    color: var(--text);
-  }
-  .file-input-hidden {
-    display: none;
-  }
+        /* ===== MAIN APP ===== */
+        #appRoot {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            min-height: 0;
+        }
+        #appRoot.visible {
+            display: flex;
+        }
 
-  .note-list-wrap {
-    flex: 1;
-    overflow-y: auto;
-    padding: 4px 8px 8px;
-    min-height: 0;
-  }
-  .note-list-wrap .list-title {
-    font-size: 11px;
-    color: var(--text-faint);
-    padding: 4px 10px 4px;
-    font-family: var(--mono);
-    letter-spacing: .5px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 4px;
-  }
-  .note-item {
-    padding: 8px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-bottom: 2px;
-    border: 1px solid transparent;
-    transition: .12s;
-  }
-  .note-item:hover {
-    background: var(--surface-2);
-  }
-  .note-item.selected {
-    background: var(--surface-3);
-    border-color: var(--border);
-  }
-  .note-item .t {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--text);
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .note-item .s {
-    font-size: 11px;
-    color: var(--text-faint);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .note-item .mini-tags {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    margin-top: 4px;
-  }
-  .note-item .mini-tag {
-    font-family: var(--mono);
-    font-size: 9px;
-    color: var(--violet);
-    background: rgba(147, 130, 214, .1);
-    border: 1px solid rgba(147, 130, 214, .22);
-    padding: 1px 6px;
-    border-radius: 20px;
-  }
-  .empty-hint {
-    padding: 24px 14px;
-    text-align: center;
-    color: var(--text-faint);
-    font-size: 12px;
-    line-height: 1.8;
-  }
-
-  .tags-section {
-    flex-shrink: 0;
-    border-top: 1px solid var(--border);
-    background: var(--surface-2);
-    max-height: 160px;
-    display: flex;
-    flex-direction: column;
-  }
-  .tags-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 14px;
-    cursor: pointer;
-    user-select: none;
-    color: var(--text-dim);
-    font-size: 12px;
-    font-family: var(--mono);
-    letter-spacing: .4px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-  }
-  .tags-header:hover {
-    color: var(--text);
-  }
-  .tags-header .arrow {
-    transition: transform .2s;
-    font-size: 11px;
-  }
-  .tags-header .arrow.open {
-    transform: rotate(180deg);
-  }
-  .tags-body {
-    overflow-y: auto;
-    padding: 6px 10px 10px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    flex: 1;
-    align-content: flex-start;
-  }
-  .tags-body.collapsed {
-    display: none;
-  }
-  .tag-chip {
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 20px;
-    cursor: pointer;
-    white-space: nowrap;
-    border: 1px solid transparent;
-    transition: .12s;
-    background: rgba(111, 179, 160, .08);
-    color: var(--link);
-    border-color: rgba(111, 179, 160, .25);
-  }
-  .tag-chip:hover {
-    background: rgba(111, 179, 160, .18);
-  }
-  .tag-chip.active {
-    background: var(--link);
-    color: #0e211c;
-    border-color: var(--link);
-  }
-
-  /* ===== MODAL / TOAST ===== */
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 700;
-    background: rgba(8, 8, 12, .6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: .18s ease;
-    padding: 20px;
-  }
-  .modal-backdrop.show {
-    opacity: 1;
-    visibility: visible;
-  }
-  .modal-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px;
-    max-width: 340px;
-    width: 100%;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, .5);
-  }
-  .modal-box .m-title {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 16px;
-    margin-bottom: 6px;
-    color: var(--text);
-  }
-  .modal-box .m-body {
-    font-size: 13px;
-    color: var(--text-dim);
-    line-height: 1.9;
-    margin-bottom: 16px;
-  }
-  .modal-box .m-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .modal-btn {
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    color: var(--text);
-    border-radius: 9px;
-    padding: 9px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
-    text-align: center;
-  }
-  .modal-btn:hover {
-    border-color: var(--accent-dim);
-  }
-  .modal-btn.primary {
-    background: var(--accent);
-    color: #241a0c;
-    border-color: var(--accent);
-    font-weight: 600;
-  }
-  .modal-btn.danger {
-    color: var(--danger);
-  }
-  .modal-btn.ghost {
-    background: transparent;
-    color: var(--text-faint);
-    border-color: transparent;
-  }
-  .toast {
-    position: fixed;
-    bottom: 22px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--surface-3);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 10px 18px;
-    border-radius: 30px;
-    font-size: 13px;
-    z-index: 800;
-    opacity: 0;
-    visibility: hidden;
-    transition: .25s ease;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
-    max-width: 85vw;
-    text-align: center;
-  }
-  .toast.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0);
-  }
-  .toast.error {
-    border-color: rgba(207, 111, 111, .4);
-    color: var(--danger);
-  }
-
-  /* ===== EDITOR ===== */
-  .main {
-    flex: 1;
-    display: flex;
-    min-width: 0;
-    min-height: 0;
-    background: radial-gradient(ellipse at 20% 20%, rgba(214, 163, 92, .04), transparent 65%),
-      radial-gradient(ellipse at 80% 80%, rgba(111, 179, 160, .03), transparent 55%);
-  }
-  .editor-pane {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    background: var(--surface);
-    margin: 6px 6px 6px 3px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, .35);
-    overflow: hidden;
-  }
-  .editor-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    background: rgba(255, 255, 255, .02);
-    flex-wrap: wrap;
-  }
-  .title-input {
-    flex: 1;
-    min-width: 100px;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-family: 'Fraunces', serif;
-    font-size: 20px;
-    font-weight: 600;
-    padding: 2px 0;
-  }
-  .title-input:focus {
-    outline: none;
-    border-bottom: 2px solid var(--accent-dim);
-  }
-  .mode-toggle {
-    position: relative;
-    display: flex;
-    gap: 2px;
-    background: var(--surface-2);
-    padding: 2px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .mode-toggle .thumb {
-    position: absolute;
-    top: 2px;
-    bottom: 2px;
-    right: 2px;
-    width: calc(50% - 2px);
-    background: linear-gradient(135deg, var(--accent), #c48b45);
-    border-radius: 18px;
-    transition: transform .25s cubic-bezier(.4, 0, .2, 1);
-    box-shadow: 0 2px 8px rgba(214, 163, 92, .4);
-  }
-  .mode-toggle.read .thumb {
-    transform: translateX(-100%);
-  }
-  .mode-toggle button {
-    position: relative;
-    z-index: 2;
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    font-size: 11px;
-    padding: 5px 12px;
-    border-radius: 18px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: color .25s ease;
-  }
-  .mode-toggle button.active {
-    color: #241a0c;
-    font-weight: 600;
-  }
-  .icon-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: .15s;
-    flex-shrink: 0;
-  }
-  .icon-btn:hover {
-    border-color: var(--accent-dim);
-    color: var(--text);
-  }
-  .icon-btn.danger:hover {
-    border-color: var(--danger);
-    color: var(--danger);
-  }
-  .details-btn {
-    display: none;
-  }
-  .editor-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 18px 20px;
-    min-height: 0;
-    position: relative;
-    background: rgba(255, 255, 255, .012);
-  }
-  .md-textarea {
-    width: 100%;
-    height: 100%;
-    min-height: 240px;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    line-height: 1.8;
-    resize: none;
-    caret-color: var(--accent);
-  }
-  .md-textarea:focus {
-    outline: none;
-  }
-  .wordcount-badge {
-    position: absolute;
-    bottom: 12px;
-    left: 12px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-faint);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    padding: 3px 10px;
-    border-radius: 20px;
-    pointer-events: none;
-    opacity: .8;
-    backdrop-filter: blur(4px);
-  }
-  .preview {
-    font-size: 14px;
-    line-height: 1.9;
-    padding: 2px 0;
-  }
-  .preview h1 {
-    font-family: 'Fraunces', serif;
-    font-size: 24px;
-    font-weight: 700;
-    margin: 18px 0 10px;
-    padding-bottom: 8px;
-    position: relative;
-    color: var(--text);
-  }
-  .preview h1::after {
-    content: '';
-    display: block;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--link) 40%, transparent 85%);
-    border-radius: 2px;
-  }
-  .preview h2 {
-    font-family: 'Fraunces', serif;
-    font-size: 19px;
-    font-weight: 600;
-    margin: 16px 0 6px;
-    color: var(--text);
-    border-right: 3px solid var(--link-dim);
-    padding-right: 10px;
-  }
-  .preview h3 {
-    font-family: 'Fraunces', serif;
-    font-size: 16px;
-    font-weight: 600;
-    margin: 14px 0 6px;
-    color: #cfcbc0;
-  }
-  .preview p {
-    margin: 0 0 11px;
-    color: #d9d6cd;
-  }
-  .preview ul {
-    margin: 0 0 11px;
-    padding-inline-start: 20px;
-  }
-  .preview li {
-    margin-bottom: 4px;
-    color: #d9d6cd;
-  }
-  .preview li::marker {
-    color: var(--accent-dim);
-  }
-  .preview blockquote {
-    margin: 0 0 11px;
-    padding: 8px 14px;
-    border-inline-start: 3px solid var(--violet);
-    background: rgba(147, 130, 214, .07);
-    border-radius: 0 8px 8px 0;
-    color: #cac6d8;
-    font-size: 13px;
-  }
-  .preview code {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    padding: 1px 5px;
-    border-radius: 5px;
-    font-family: var(--mono);
-    font-size: .88em;
-    color: var(--accent);
-  }
-  .preview a.wikilink {
-    color: var(--link);
-    text-decoration: none;
-    padding: 1px 5px 2px;
-    border-radius: 5px;
-    background: rgba(111, 179, 160, .1);
-    border: 1px solid rgba(111, 179, 160, .25);
-    transition: .15s;
-  }
-  .preview a.wikilink:hover {
-    background: rgba(111, 179, 160, .22);
-    border-color: var(--link);
-  }
-  .preview a.wikilink-new {
-    color: var(--text-faint);
-    background: transparent;
-    border-style: dashed;
-  }
-  .tag-inline {
-    font-family: var(--mono);
-    font-size: .85em;
-  }
-  .empty-editor {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-faint);
-    gap: 12px;
-    text-align: center;
-    padding: 20px;
-  }
-  .empty-editor .big {
-    font-family: 'Fraunces', serif;
-    font-size: 22px;
-    color: var(--text-dim);
-  }
-
-  /* ===== TAG PANEL ===== */
-  .tag-panel {
-    border-top: 1px solid var(--border);
-    background: rgba(255, 255, 255, .015);
-    padding: 8px 16px;
-    flex-shrink: 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    min-height: 46px;
-  }
-  .tag-panel .lbl {
-    font-size: 11px;
-    color: var(--text-dim);
-    font-weight: 500;
-  }
-  .tag-panel .tag-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    flex: 1;
-  }
-  .tag-panel .note-tag-pill {
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 3px 6px 3px 9px;
-    border-radius: 20px;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    border: 1px solid transparent;
-    transition: .15s;
-  }
-  .tag-panel .note-tag-pill .x {
-    cursor: pointer;
-    color: var(--text-faint);
-    font-size: 10px;
-  }
-  .tag-panel .note-tag-pill .x:hover {
-    color: var(--danger);
-  }
-  .tag-panel .tag-input-wrap {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-    position: relative;
-  }
-  .tag-panel .tag-input {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 11px;
-    font-family: var(--mono);
-    width: 120px;
-    transition: .15s;
-  }
-  .tag-panel .tag-input:focus {
-    outline: none;
-    border-color: var(--violet);
-    box-shadow: 0 0 0 3px rgba(147, 130, 214, .15);
-  }
-  .tag-panel .tag-add-btn {
-    background: linear-gradient(135deg, var(--violet), #7a6ac2);
-    color: #181022;
-    border: none;
-    border-radius: 20px;
-    padding: 4px 14px;
-    font-size: 11px;
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 600;
-    box-shadow: 0 3px 10px rgba(147, 130, 214, .3);
-    transition: .15s;
-  }
-  .tag-panel .tag-add-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 14px rgba(147, 130, 214, .45);
-  }
-  .tag-panel .tag-suggest {
-    position: absolute;
-    bottom: calc(100% + 4px);
-    right: 0;
-    min-width: 180px;
-    max-height: 180px;
-    overflow-y: auto;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, .45);
-    z-index: 60;
-    padding: 5px;
-    display: none;
-  }
-  .tag-panel .tag-suggest.show {
-    display: block;
-  }
-  .tag-panel .tag-suggest-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 12px;
-    color: var(--text);
-    font-family: var(--mono);
-  }
-  .tag-panel .tag-suggest-item:hover {
-    background: var(--surface-3);
-  }
-  .tag-panel .tag-suggest-item .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .tag-panel .tag-suggest-item .cnt {
-    margin-inline-start: auto;
-    color: var(--text-faint);
-    font-size: 10px;
-  }
-  .tag-panel .tag-suggest-create {
-    border-top: 1px dashed var(--border);
-    margin-top: 4px;
-    padding-top: 6px;
-    color: var(--link);
-  }
-  .tag-panel .suggest-strip {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    margin-right: 4px;
-  }
-  .tag-panel .suggest-chip {
-    font-size: 10px;
-    padding: 2px 7px;
-    border-radius: 20px;
-    border: 1px dashed;
-    cursor: pointer;
-    font-family: var(--mono);
-    transition: .12s;
-  }
-  .tag-panel .suggest-chip:hover {
-    opacity: 1;
-    transform: translateY(-1px);
-  }
-
-  /* ===== RIGHT PANEL ===== */
-  .rightpanel {
-    width: 240px;
-    flex-shrink: 0;
-    background: var(--surface);
-    border-inline-start: 1px solid var(--border);
-    padding: 14px 14px;
-    overflow-y: auto;
-  }
-  .rp-section {
-    margin-bottom: 18px;
-  }
-  .rp-title {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 1px;
-    color: var(--text-faint);
-    text-transform: uppercase;
-    margin-bottom: 7px;
-  }
-  .rp-link {
-    display: block;
-    font-size: 12.5px;
-    color: var(--link);
-    padding: 5px 8px;
-    margin-bottom: 2px;
-    border-radius: 6px;
-    cursor: pointer;
-    background: rgba(111, 179, 160, .06);
-  }
-  .rp-link:hover {
-    background: rgba(111, 179, 160, .14);
-  }
-  .rp-empty {
-    font-size: 12px;
-    color: var(--text-faint);
-    font-style: italic;
-  }
-  .rp-tag {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 10.5px;
-    color: var(--violet);
-    background: rgba(147, 130, 214, .1);
-    border: 1px solid rgba(147, 130, 214, .25);
-    padding: 2px 7px;
-    border-radius: 20px;
-    margin: 0 3px 5px 0;
-  }
-  .insight-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11.5px;
-    color: var(--text-dim);
-    padding: 4px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .insight-row b {
-    color: var(--text);
-    font-family: var(--mono);
-    font-weight: 500;
-  }
-
-  /* ===== GRAPH ===== */
-  .graph-pane {
-    position: relative;
-    flex: 1;
-    background: var(--bg);
-  }
-  svg.graph {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-  .graph-hint {
-    position: absolute;
-    bottom: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 11px;
-    color: var(--text-faint);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 5px 12px;
-    border-radius: 20px;
-  }
-  .flow-edge {
-    animation: antsFlow 2.4s linear infinite;
-  }
-  @keyframes antsFlow {
-    to {
-      stroke-dashoffset: -18;
-    }
-  }
-  .graph-legend {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px 10px;
-    font-size: 10px;
-    color: var(--text-dim);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
-  }
-  .graph-legend .lg-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .graph-legend .lg-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .graph-legend .lg-diamond {
-    width: 7px;
-    height: 7px;
-    transform: rotate(45deg);
-    flex-shrink: 0;
-    border: 1.4px solid #9382d6;
-    background: transparent;
-  }
-
-  /* ===== CHAT ===== */
-  .chat-pane {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    background: var(--surface);
-    margin: 6px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    overflow: hidden;
-  }
-  .chat-head {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    flex-wrap: wrap;
-  }
-  .chat-head .ttl {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 16px;
-    color: var(--text);
-  }
-  .chat-head .sub {
-    font-size: 11px;
-    color: var(--text-faint);
-    margin-inline-start: auto;
-  }
-  .chat-clear {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    font-size: 11px;
-    padding: 5px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .chat-clear:hover {
-    border-color: var(--danger);
-    color: var(--danger);
-  }
-  .chat-settings {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    padding: 8px 16px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    font-size: 11px;
-    color: var(--text-dim);
-  }
-  .chat-settings select,
-  .chat-settings input {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 5px 8px;
-    font-size: 11px;
-    font-family: inherit;
-  }
-  .chat-settings .ollama-note {
-    flex-basis: 100%;
-    font-size: 10.5px;
-    color: var(--text-faint);
-    line-height: 1.7;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 10px;
-  }
-  .chat-settings .ollama-note code {
-    color: var(--accent);
-    font-family: var(--mono);
-  }
-  .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .bubble {
-    max-width: 78%;
-    padding: 9px 13px;
-    border-radius: 14px;
-    font-size: 13px;
-    line-height: 1.8;
-  }
-  .bubble.user {
-    align-self: flex-end;
-    background: var(--accent);
-    color: #241a0c;
-    border-bottom-left-radius: 4px;
-    font-weight: 500;
-  }
-  .bubble.assistant {
-    align-self: flex-start;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-bottom-right-radius: 4px;
-  }
-  .bubble.assistant p {
-    margin: 0 0 8px;
-    color: #d9d6cd;
-  }
-  .bubble.assistant p:last-child {
-    margin-bottom: 0;
-  }
-  .bubble.assistant a.wikilink {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dashed var(--link-dim);
-  }
-  .bubble.error {
-    align-self: flex-start;
-    background: rgba(207, 111, 111, .1);
-    border: 1px solid rgba(207, 111, 111, .3);
-    color: var(--danger);
-  }
-  .chat-empty {
-    color: var(--text-faint);
-    font-size: 13px;
-    text-align: center;
-    margin: auto;
-    line-height: 2;
-  }
-  .chat-inputrow {
-    display: flex;
-    gap: 8px;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .chat-input {
-    flex: 1;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 22px;
-    padding: 9px 16px;
-    font-size: 13px;
-    font-family: inherit;
-  }
-  .chat-input:focus {
-    outline: none;
-    border-color: var(--accent-dim);
-  }
-  .chat-send {
-    background: var(--accent);
-    color: #241a0c;
-    border: none;
-    border-radius: 22px;
-    padding: 0 18px;
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .chat-send:disabled {
-    opacity: .5;
-    cursor: default;
-  }
-  .typing-dots span {
-    display: inline-block;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--text-faint);
-    margin-inline-end: 3px;
-    animation: blink 1.2s infinite;
-  }
-  .typing-dots span:nth-child(2) {
-    animation-delay: .2s;
-  }
-  .typing-dots span:nth-child(3) {
-    animation-delay: .4s;
-  }
-  @keyframes blink {
-    0%,
-    80%,
-    100% {
-      opacity: .25;
-    }
-    40% {
-      opacity: 1;
-    }
-  }
-
-  /* ===== SCROLLBAR ===== */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--surface-3);
-    border-radius: 5px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--border);
-  }
-
-  /* ===== DRAWER BACKDROP ===== */
-  .drawer-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(8, 8, 12, .55);
-    z-index: 400;
-    opacity: 0;
-    visibility: hidden;
-    transition: .2s ease;
-  }
-  .drawer-backdrop.show {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  /* ===== MOBILE ===== */
-  body.is-mobile .hamburger {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  body.is-mobile .stats {
-    display: none;
-  }
-  body.is-mobile .brand {
-    font-size: 16px;
-  }
-  body.is-mobile .topbar {
-    padding: 6px 10px;
-    gap: 8px;
-  }
-  body.is-mobile .viewbtns {
-    gap: 3px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    flex-wrap: nowrap;
-  }
-  body.is-mobile .viewbtns::-webkit-scrollbar {
-    display: none;
-  }
-  body.is-mobile .viewbtn {
-    padding: 5px 10px;
-    font-size: 11px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  body.is-mobile .sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    z-index: 500;
-    width: 84vw;
-    max-width: 320px;
-    transform: translateX(100%);
-    transition: transform .25s ease;
-    box-shadow: -8px 0 30px rgba(0, 0, 0, .4);
-  }
-  body.is-mobile .sidebar.open {
-    transform: translateX(0);
-  }
-  body.is-mobile .details-btn {
-    display: flex;
-  }
-  body.is-mobile .rightpanel {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 500;
-    width: auto;
-    max-height: 70vh;
-    border-inline-start: none;
-    border-top: 1px solid var(--border);
-    border-radius: 18px 18px 0 0;
-    transform: translateY(105%);
-    transition: transform .28s ease;
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, .4);
-  }
-  body.is-mobile .rightpanel.open {
-    transform: translateY(0);
-  }
-  body.is-mobile .rightpanel::before {
-    content: '';
-    display: block;
-    width: 34px;
-    height: 4px;
-    border-radius: 3px;
-    background: var(--border);
-    margin: 0 auto 10px;
-  }
-  body.is-mobile .editor-pane {
-    margin: 4px;
-  }
-  body.is-mobile .editor-body {
-    padding: 14px 14px;
-  }
-  body.is-mobile .editor-toolbar {
-    padding: 8px 10px;
-  }
-  body.is-mobile .title-input {
-    font-size: 17px;
-  }
-  body.is-mobile .tag-panel {
-    padding: 6px 10px;
-  }
-  body.is-mobile .tag-panel .tag-input {
-    width: 90px;
-  }
-  body.is-mobile .chat-pane {
-    margin: 4px;
-  }
-  body.is-mobile .chat-messages {
-    padding: 12px 12px;
-  }
-  body.is-mobile .chat-inputrow {
-    padding: 10px 12px;
-  }
-  body.is-mobile .chat-head {
-    padding: 8px 12px;
-  }
-  body.is-mobile .chat-settings {
-    padding: 6px 12px;
-  }
-  body.is-mobile .bubble {
-    max-width: 88%;
-    font-size: 12.5px;
-  }
-  body.is-mobile .graph-hint {
-    font-size: 9.5px;
-    padding: 4px 10px;
-    bottom: 8px;
-  }
-  body.is-mobile .graph-legend {
-    padding: 6px 8px;
-    font-size: 9px;
-    top: 8px;
-    left: 8px;
-    gap: 3px;
-  }
-  body.is-mobile .empty-hint {
-    padding: 16px 10px;
-  }
-  body.is-mobile .tags-section {
-    max-height: 120px;
-  }
-  body.is-mobile .tags-body {
-    padding: 4px 8px 8px;
-  }
-  body.is-mobile .lang-switch button {
-    font-size: 10px;
-    padding: 3px 8px;
-  }
-  body.is-mobile .modal-box {
-    padding: 16px;
-    max-width: 92vw;
-  }
-
-  /* ===== LIGHT THEME OVERRIDES ===== */
-  .theme-light {
-    --bg: #f5f3f0;
-    --surface: #efede8;
-    --surface-2: #e5e3dc;
-    --surface-3: #d8d6cf;
-    --border: #c8c5bc;
-    --text: #1e1e24;
-    --text-dim: #5a5a6a;
-    --text-faint: #8a8a9a;
-  }
-  .theme-light .viewbtn.active {
-    color: #1e1e24;
-  }
-  .theme-light .mode-toggle button.active {
-    color: #1e1e24;
-  }
-  .theme-light .settings-row .options button.active {
-    color: #1e1e24;
-  }
-  .theme-light .settings-submit {
-    color: #1e1e24;
-  }
-  .theme-light .banner-actions .btn-primary {
-    color: #1e1e24;
-  }
-  .theme-light .new-note-btn {
-    color: #1e1e24;
-  }
-  .theme-light .modal-btn.primary {
-    color: #1e1e24;
-  }
-  .theme-light .chat-send {
-    color: #1e1e24;
-  }
-  .theme-light .lang-switch button.active {
-    color: #1e1e24;
-  }
-  .theme-light .tag-chip.active {
-    color: #1e1e24;
-  }
-  .theme-light .bubble.user {
-    color: #1e1e24;
-  }
-  .theme-light .note-tag-pill {
-    color: var(--text) !important;
-  }
-  .theme-light .mode-toggle .thumb {
-    background: var(--accent);
-  }
-</style>
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .overlay-card {
+                padding: 24px 18px;
+                margin: 10px;
+            }
+            .settings-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .settings-row .options {
+                align-self: stretch;
+                justify-content: center;
+            }
+            .banner-actions .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            .close-banner {
+                top: 12px;
+                right: 12px;
+            }
+            [dir="rtl"] .close-banner {
+                right: auto;
+                left: 12px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <!-- ===== LOADING SCREEN ===== -->
-  <div id="loadingScreen">
-    <svg viewBox="0 0 220 160" width="180" height="130">
-      <g id="loadLines" fill="none" stroke="#3a3a4d" stroke-width="1.2"></g>
-      <g id="loadNodes"></g>
-    </svg>
-    <div class="load-brand">Second Brain</div>
-    <div class="load-msg" id="loadMsg">Waking up…</div>
-  </div>
-
-  <!-- ===== OVERLAY: SETTINGS (one-time) ===== -->
-  <div class="overlay-page" id="settingsPage">
-    <div class="overlay-card">
-      <h2 id="settingsTitle">⚙️ Initial Setup</h2>
-      <p id="settingsDesc">Choose your preferences. This page appears only once.</p>
-      <div class="settings-row">
-        <span class="label" id="themeLabel">🌓 Theme</span>
-        <div class="options" id="themeOptions">
-          <button class="active" data-value="dark">Dark</button>
-          <button data-value="light">Light</button>
-        </div>
-      </div>
-      <div class="settings-row">
-        <span class="label" id="langLabel">🌐 Language</span>
-        <div class="options" id="langOptions">
-          <button class="active" data-value="en">English</button>
-          <button data-value="fa">فارسی</button>
-        </div>
-      </div>
-      <button class="settings-submit" id="settingsSubmit">✅ Continue</button>
-    </div>
-  </div>
-
-  <!-- ===== OVERLAY: BANNER ===== -->
-  <div class="overlay-page" id="bannerPage">
-    <div class="overlay-card">
-      <button class="close-banner" id="closeBannerBtn">✕</button>
-      <h2 id="bannerTitle">📢 Announcement</h2>
-      <p id="bannerSub" style="font-size:13px;color:var(--text-dim);">Latest news & updates</p>
-      <div class="banner-area" id="bannerArea">
-        <div class="placeholder-banner">⏳ Loading content…</div>
-      </div>
-      <div class="banner-actions">
-        <button class="btn btn-primary" id="bannerActionBtn">📖 View</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== TOP BAR ===== -->
-  <div class="topbar">
-    <button class="hamburger" id="hamburgerBtn" aria-label="Menu">☰</button>
-    <div class="brand"><span class="dot"></span><span id="brandText">Second Brain</span></div>
-    <div class="viewbtns">
-      <button class="viewbtn active" id="btn-notes" data-key="notes">📄</button>
-      <button class="viewbtn" id="btn-graph" data-key="graph">🕸️</button>
-      <button class="viewbtn" id="btn-chat" data-key="chat">🤖</button>
-    </div>
-    <div class="stats" id="stats"></div>
-    <div class="lang-switch">
-      <button id="langFa">فا</button>
-      <button id="langEn" class="active">En</button>
-    </div>
-    <button class="settings-gear" id="settingsGearBtn" title="Settings">⚙️</button>
-  </div>
-
-  <!-- ===== LAYOUT ===== -->
-  <div class="layout">
-
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="sidebar-head">
-        <input class="search-box" id="search" placeholder="Search notes…">
-        <button class="new-note-btn" id="newNoteBtn">+ New note</button>
-        <div class="backup-row">
-          <button class="backup-btn" id="exportBtn">⬇ Backup</button>
-          <button class="backup-btn" id="importBtn">⬆ Restore</button>
-          <input type="file" id="importFile" class="file-input-hidden" accept="application/json">
-        </div>
-      </div>
-      <div class="note-list-wrap">
-        <div class="list-title" id="listTitle">📄 Notes</div>
-        <div class="note-list" id="noteList"></div>
-      </div>
-      <div class="tags-section">
-        <div class="tags-header" id="tagsHeader">
-          <span id="tagsLabel">🏷️ Tags</span>
-          <span class="arrow open" id="tagsArrow">▾</span>
-        </div>
-        <div class="tags-body" id="tagsBody"></div>
-      </div>
+    <!-- ===== LOADING SCREEN ===== -->
+    <div id="loadingScreen">
+        <svg viewBox="0 0 220 160" width="180" height="130">
+            <g id="loadLines" fill="none" stroke="#3a3a4d" stroke-width="1.2"></g>
+            <g id="loadNodes"></g>
+        </svg>
+        <div class="load-brand">Second Brain</div>
+        <div class="load-msg" id="loadMsg">Waking up…</div>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <div class="main" id="mainNotes">
-      <div class="editor-pane" id="editorPane"></div>
-      <div class="rightpanel" id="rightPanel" style="display:none;"></div>
-    </div>
-
-    <!-- GRAPH -->
-    <div class="graph-pane" id="mainGraph" style="display:none;">
-      <svg class="graph" id="graphSvg"></svg>
-      <div class="graph-legend">
-        <div class="lg-row"><span class="lg-dot" style="background:#d6a35c;box-shadow:0 0 6px #d6a35c;"></span> <span>Active note</span></div>
-        <div class="lg-row"><span class="lg-dot" style="background:#1e2e29;border:1.4px solid #6fb3a0;"></span> <span>Note</span></div>
-        <div class="lg-row"><span class="lg-diamond"></span> <span>Tag</span></div>
-      </div>
-      <div class="graph-hint">Scroll = zoom · Drag, hover, click</div>
-    </div>
-
-    <!-- CHAT -->
-    <div class="chat-pane" id="mainChat" style="display:none;">
-      <div class="chat-head">
-        <div class="ttl">Smart Assistant</div>
-        <div class="sub" id="chatSub">Answers based on your notes</div>
-        <button class="chat-clear" id="chatClearBtn">Clear chat</button>
-      </div>
-      <div class="chat-settings" id="chatSettingsRow">
-        <span>Assistant source:</span>
-        <select id="providerSelect">
-          <option value="claude">Claude (Online)</option>
-          <option value="ollama">Ollama (Local)</option>
-        </select>
-        <span id="claudeFields" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
-          <input id="claudeKeyInput" type="password" placeholder="API Key (sk-ant-… or fla_…)" style="width:170px;">
-          <input id="claudeUrlInput" placeholder="Server URL (default: Anthropic)" style="width:170px;">
-        </span>
-        <span id="ollamaFields" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
-          <input id="ollamaModelInput" placeholder="Model name (e.g. qwen2.5-coder)" style="width:170px;">
-          <input id="ollamaUrlInput" placeholder="Server URL" style="width:150px;">
-        </span>
-        <div class="ollama-note" id="claudeNote" style="display:none;"></div>
-        <div class="ollama-note" id="ollamaNote" style="display:none;"></div>
-      </div>
-      <div class="chat-messages" id="chatMessages"></div>
-      <div class="chat-inputrow">
-        <input class="chat-input" id="chatInput" placeholder="Ask about your notes…">
-        <button class="chat-send" id="chatSendBtn">Ask</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== BACKDROP (mobile) ===== -->
-  <div class="drawer-backdrop" id="drawerBackdrop"></div>
-
-  <!-- ===== MODAL ===== -->
-  <div class="modal-backdrop" id="modalBackdrop">
-    <div class="modal-box">
-      <div class="m-title" id="modalTitle"></div>
-      <div class="m-body" id="modalBody"></div>
-      <div class="m-actions" id="modalActions"></div>
-    </div>
-  </div>
-  <div class="toast" id="toast"></div>
-
-  <script>
-    (function() {
-      'use strict';
-
-      // ================================================================
-      //  SETTINGS & LANGUAGE (only in settings page)
-      // ================================================================
-      const SETTINGS_KEY = 'second-brain-settings-v1';
-      let currentLang = 'en';
-      let currentTheme = 'dark';
-
-      const settingsI18n = {
-        en: {
-          title: '⚙️ Initial Setup',
-          desc: 'Choose your preferences. This page appears only once.',
-          theme: '🌓 Theme',
-          lang: '🌐 Language',
-          continue: '✅ Continue'
-        },
-        fa: {
-          title: '⚙️ تنظیمات اولیه',
-          desc: 'تنظیمات دلخواه خود را انتخاب کنید. این صفحه فقط یکبار نمایش داده می‌شود.',
-          theme: '🌓 تم',
-          lang: '🌐 زبان',
-          continue: '✅ ادامه'
-        }
-      };
-
-      function getStoredSettings() {
-        try { const raw = localStorage.getItem(SETTINGS_KEY); if (raw) return JSON.parse(raw); } catch (_) {}
-        return null;
-      }
-
-      function saveSettings(settings) {
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-      }
-
-      function applyTheme(theme) {
-        currentTheme = theme;
-        if (theme === 'light') {
-          document.documentElement.classList.add('theme-light');
-        } else {
-          document.documentElement.classList.remove('theme-light');
-        }
-      }
-
-      function applyLang(lang) {
-        currentLang = lang;
-        document.documentElement.lang = lang;
-        document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
-        document.getElementById('langFa').classList.toggle('active', lang === 'fa');
-        document.getElementById('langEn').classList.toggle('active', lang === 'en');
-        // Update settings UI
-        const t = settingsI18n[lang] || settingsI18n.en;
-        document.getElementById('settingsTitle').textContent = t.title;
-        document.getElementById('settingsDesc').textContent = t.desc;
-        document.getElementById('themeLabel').textContent = t.theme;
-        document.getElementById('langLabel').textContent = t.lang;
-        document.getElementById('settingsSubmit').textContent = t.continue;
-        // Update top bar
-        document.getElementById('brandText').textContent = lang === 'fa' ? 'مغز دوم' : 'Second Brain';
-        document.getElementById('newNoteBtn').textContent = lang === 'fa' ? '+ یادداشت جدید' : '+ New note';
-        document.getElementById('exportBtn').textContent = lang === 'fa' ? '⬇ پشتیبان' : '⬇ Backup';
-        document.getElementById('importBtn').textContent = lang === 'fa' ? '⬆ بازیابی' : '⬆ Restore';
-        document.getElementById('listTitle').textContent = lang === 'fa' ? '📄 یادداشت‌ها' : '📄 Notes';
-        document.getElementById('tagsLabel').textContent = lang === 'fa' ? '🏷️ تگ‌های کلی' : '🏷️ Tags';
-        document.getElementById('chatClearBtn').textContent = lang === 'fa' ? 'پاک کردن گفتگو' : 'Clear chat';
-        document.getElementById('chatSendBtn').textContent = lang === 'fa' ? 'پرسیدن' : 'Ask';
-        document.getElementById('chatInput').placeholder = lang === 'fa' ? 'یه سوال درباره یادداشت‌هات بپرس…' :
-          'Ask about your notes…';
-        document.querySelector('.graph-hint').textContent = lang === 'fa' ?
-          'اسکرول = زوم · درگ کن، هاور کن، کلیک کن' :
-          'Scroll = zoom · Drag, hover, click';
-        document.querySelectorAll('.graph-legend .lg-row span').forEach((el, i) => {
-          const texts = lang === 'fa' ?
-            ['یادداشت باز', 'یادداشت', 'تگ'] :
-            ['Active note', 'Note', 'Tag'];
-          if (i < 3) el.textContent = texts[i];
-        });
-        document.querySelector('.chat-head .ttl').textContent = lang === 'fa' ? 'دستیار هوشمند' : 'Smart Assistant';
-        document.querySelector('.chat-head .sub').textContent = lang === 'fa' ?
-          'بر اساس یادداشت‌های تو جواب می‌ده' :
-          'Answers based on your notes';
-        document.getElementById('claudeNote').textContent = lang === 'fa' ?
-          'این فایل الان به‌صورت مستقل (خارج از چت کلود) بازه، پس برای وصل شدن به Claude به یه کلید API نیاز داری.\nاز console.anthropic.com یه کلید بساز (۵ دلار اعتبار رایگان) و اینجا بذار.\nکلید فقط تو مرورگر خودت ذخیره می‌شه.' :
-          'This file is opened standalone (outside Claude chat), so you need an API key to connect to Claude.\nGet a key from console.anthropic.com (free $5 credit).\nKey is stored only in your browser.';
-        document.getElementById('ollamaNote').textContent = lang === 'fa' ?
-          'قبل از استفاده، Ollama باید در حال اجراست و اجازه‌ی دسترسی از مرورگر رو داشته باشه.\nتو ترمینال بزن: OLLAMA_ORIGINS=* ollama serve\nبعد مطمئن شو مدل رو با ollama pull qwen2.5-coder از قبل دانلود کردی.' :
-          'Ollama must be running and allow browser access.\nRun: OLLAMA_ORIGINS=* ollama serve\nMake sure you have pulled a model like qwen2.5-coder.';
-        // Update view buttons
-        document.querySelectorAll('.viewbtn').forEach(btn => {
-          const key = btn.dataset.key;
-          if (key === 'notes') btn.textContent = lang === 'fa' ? 'یادداشت‌ها' : 'Notes';
-          else if (key === 'graph') btn.textContent = lang === 'fa' ? 'نمای گراف' : 'Graph View';
-          else if (key === 'chat') btn.textContent = lang === 'fa' ? 'دستیار هوشمند' : 'Smart Assistant';
-        });
-        updateChatSub();
-      }
-
-      function updateChatSub() {
-        const sub = document.querySelector('.chat-head .sub');
-        if (chatProvider === 'ollama') {
-          sub.textContent = currentLang === 'fa' ?
-            `آفلاین · مدل محلی «${ollamaModel}» · ${Object.keys(notes).length} یادداشت` :
-            `Offline · Local model "${ollamaModel}" · ${Object.keys(notes).length} notes`;
-        } else {
-          sub.textContent = currentLang === 'fa' ?
-            `بر اساس ${Object.keys(notes).length} یادداشت جواب می‌ده` :
-            `Based on ${Object.keys(notes).length} notes`;
-        }
-      }
-
-      // ================================================================
-      //  SETTINGS PAGE UI
-      // ================================================================
-      const settingsPage = document.getElementById('settingsPage');
-      const themeBtns = document.querySelectorAll('#themeOptions button');
-      const langBtns = document.querySelectorAll('#langOptions button');
-      const settingsSubmit = document.getElementById('settingsSubmit');
-      const settingsGearBtn = document.getElementById('settingsGearBtn');
-
-      let selectedTheme = 'dark';
-      let selectedLang = 'en';
-
-      // Load stored settings
-      const stored = getStoredSettings();
-      if (stored && stored.configured) {
-        selectedTheme = stored.theme || 'dark';
-        selectedLang = stored.lang || 'en';
-        applyTheme(selectedTheme);
-        applyLang(selectedLang);
-      }
-
-      // Setup theme & lang buttons
-      themeBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.value === selectedTheme);
-        btn.addEventListener('click', () => {
-          themeBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          selectedTheme = btn.dataset.value;
-        });
-      });
-      langBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.value === selectedLang);
-        btn.addEventListener('click', () => {
-          langBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          selectedLang = btn.dataset.value;
-          // preview language change on settings page
-          const t = settingsI18n[selectedLang] || settingsI18n.en;
-          document.getElementById('settingsTitle').textContent = t.title;
-          document.getElementById('settingsDesc').textContent = t.desc;
-          document.getElementById('themeLabel').textContent = t.theme;
-          document.getElementById('langLabel').textContent = t.lang;
-          settingsSubmit.textContent = t.continue;
-        });
-      });
-
-      // Submit settings
-      settingsSubmit.addEventListener('click', function() {
-        const settings = { theme: selectedTheme, lang: selectedLang, configured: true, timestamp: Date.now() };
-        saveSettings(settings);
-        applyTheme(selectedTheme);
-        applyLang(selectedLang);
-        settingsPage.classList.remove('show');
-        // Show banner after settings
-        showBannerPage(selectedLang);
-      });
-
-      // Gear button: reopen settings
-      settingsGearBtn.addEventListener('click', function() {
-        const s = getStoredSettings() || { theme: 'dark', lang: 'en' };
-        selectedTheme = s.theme || 'dark';
-        selectedLang = s.lang || 'en';
-        themeBtns.forEach(b => b.classList.toggle('active', b.dataset.value === selectedTheme));
-        langBtns.forEach(b => b.classList.toggle('active', b.dataset.value === selectedLang));
-        const t = settingsI18n[selectedLang] || settingsI18n.en;
-        document.getElementById('settingsTitle').textContent = t.title;
-        document.getElementById('settingsDesc').textContent = t.desc;
-        document.getElementById('themeLabel').textContent = t.theme;
-        document.getElementById('langLabel').textContent = t.lang;
-        settingsSubmit.textContent = t.continue;
-        settingsPage.classList.add('show');
-        settingsSubmit.onclick = function() {
-          const settings = { theme: selectedTheme, lang: selectedLang, configured: true, timestamp: Date.now() };
-          saveSettings(settings);
-          applyTheme(selectedTheme);
-          applyLang(selectedLang);
-          settingsPage.classList.remove('show');
-          settingsSubmit.onclick = null;
-          // Re-bind
-          settingsSubmit.onclick = function() {
-            const s2 = { theme: selectedTheme, lang: selectedLang, configured: true, timestamp: Date.now() };
-            saveSettings(s2);
-            applyTheme(selectedTheme);
-            applyLang(selectedLang);
-            settingsPage.classList.remove('show');
-          };
-        };
-      });
-
-      // Language switch in top bar
-      document.getElementById('langFa').addEventListener('click', function() {
-        selectedLang = 'fa';
-        applyLang('fa');
-        // Save settings
-        const s = getStoredSettings() || { theme: currentTheme, lang: 'en', configured: true, timestamp: Date.now() };
-        s.lang = 'fa';
-        saveSettings(s);
-      });
-      document.getElementById('langEn').addEventListener('click', function() {
-        selectedLang = 'en';
-        applyLang('en');
-        const s = getStoredSettings() || { theme: currentTheme, lang: 'en', configured: true, timestamp: Date.now() };
-        s.lang = 'en';
-        saveSettings(s);
-      });
-
-      // ================================================================
-      //  BANNER PAGE
-      // ================================================================
-      const bannerPage = document.getElementById('bannerPage');
-      const bannerArea = document.getElementById('bannerArea');
-      const bannerTitle = document.getElementById('bannerTitle');
-      const bannerSub = document.getElementById('bannerSub');
-      const bannerActionBtn = document.getElementById('bannerActionBtn');
-      const closeBannerBtn = document.getElementById('closeBannerBtn');
-
-      const BANNER_URL = 'https://raw.githubusercontent.com/IQZEUS/brainmain/refs/heads/main/banner.json';
-
-      const defaultBanner = {
-        en: {
-          title: '📢 Announcement',
-          sub: 'Latest news & updates',
-          html: '<div class="placeholder-banner">No content from GitHub yet.<br>Check your BANNER_URL.</div>',
-          button: { label: '📖 View', link: 'https://github.com/IQZEUS/brainmain' }
-        },
-        fa: {
-          title: '📢 اطلاع‌رسانی',
-          sub: 'آخرین اخبار و بروزرسانی‌ها',
-          html: '<div class="placeholder-banner">محتوایی از گیت دریافت نشد.<br>آدرس BANNER_URL را بررسی کنید.</div>',
-          button: { label: '📖 مشاهده', link: 'https://github.com/IQZEUS/brainmain' }
-        }
-      };
-
-      let bannerFetched = false;
-
-      function renderBanner(lang) {
-        let data = null;
-        try {
-          const cached = localStorage.getItem('banner-cache');
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (parsed[lang]) data = parsed[lang];
-            else if (parsed.en) data = parsed.en;
-          }
-        } catch (_) {}
-        if (!data) data = defaultBanner[lang] || defaultBanner.en;
-        bannerTitle.textContent = data.title || '📢 Announcement';
-        bannerSub.textContent = data.sub || 'Latest news & updates';
-        bannerArea.innerHTML = data.html || '<div class="placeholder-banner">No content</div>';
-        const btn = data.button || { label: '📖 View', link: '#' };
-        bannerActionBtn.textContent = btn.label || '📖 View';
-        bannerActionBtn.onclick = () => {
-          if (btn.link && btn.link !== '#') window.open(btn.link, '_blank');
-          else alert('No link configured.');
-        };
-      }
-
-      async function fetchBanner(lang) {
-        if (bannerFetched) { renderBanner(lang); return; }
-        try {
-          const response = await fetch(BANNER_URL);
-          if (!response.ok) throw new Error('HTTP ' + response.status);
-          const json = await response.json();
-          localStorage.setItem('banner-cache', JSON.stringify(json));
-          bannerFetched = true;
-          renderBanner(lang);
-        } catch (e) {
-          try {
-            const cached = localStorage.getItem('banner-cache');
-            if (cached) { renderBanner(lang); return; }
-          } catch (_) {}
-          renderBanner(lang);
-        }
-      }
-
-      function showBannerPage(lang) {
-        fetchBanner(lang);
-        bannerPage.classList.add('show');
-      }
-
-      function closeBannerAndEnter() {
-        bannerPage.classList.remove('show');
-        // Initialize main app
-        if (document.getElementById('mainNotes').style.display !== 'none') {
-          renderEditor();
-        }
-        console.log('🧠 Second Brain launched.');
-      }
-
-      closeBannerBtn.addEventListener('click', closeBannerAndEnter);
-
-      // ================================================================
-      //  MAIN APP
-      // ================================================================
-      const STORAGE_KEY = 'second-brain-notes-v1';
-      const MAX_GRAPH_NODES = 250;
-
-      let notes = {};
-      let currentId = null;
-      let editMode = true;
-      let activeTag = null;
-      let searchTerm = '';
-      let chatProvider = 'claude';
-      let claudeApiKey = '';
-      let claudeBaseUrl = 'https://api.anthropic.com';
-      let ollamaModel = 'qwen2.5-coder';
-      let ollamaUrl = 'http://localhost:11434';
-      let chatApiHistory = [];
-      let chatDisplay = [];
-      let chatBusy = false;
-
-      function uid() { return 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-
-      // Storage
-      async function storageGet(key) {
-        let val = null;
-        try {
-          if (window.storage && typeof window.storage.get === 'function') {
-            const r = await window.storage.get(key, false);
-            if (r && typeof r.value === 'string') val = r.value;
-          }
-        } catch (_) {}
-        if (val === null) {
-          try { val = localStorage.getItem(key); } catch (_) {}
-        }
-        return val;
-      }
-
-      async function storageSet(key, value) {
-        let ok = false;
-        try {
-          if (window.storage && typeof window.storage.set === 'function') {
-            const r = await window.storage.set(key, value, false);
-            if (r) ok = true;
-          }
-        } catch (_) {}
-        try { localStorage.setItem(key, value);
-          ok = true; } catch (_) {}
-        return ok;
-      }
-
-      let saveTimer = null;
-
-      function saveNotes() {
-        clearTimeout(saveTimer);
-        saveTimer = setTimeout(async () => {
-          try { await storageSet(STORAGE_KEY, JSON.stringify(notes)); } catch (_) {}
-        }, 250);
-      }
-
-      // Seed
-      function seedIfEmpty() {
-        if (Object.keys(notes).length) return;
-        const w = uid(),
-          i = uid(),
-          p = uid();
-        notes[w] = {
-          id: w,
-          title: 'Welcome',
-          content: '# Welcome to your Second Brain\n\nThis is a place to think, connect, and grow ideas.\n\nWrite [[Initial Ideas]] to link to another note — if it doesn\'t exist, it will be created automatically.\n\nUse # for tags, like #start or #guide\n\nTry the graph view above to see connections.',
-          createdAt: Date.now(),
-          updatedAt: Date.now()
-        };
-        notes[i] = {
-          id: i,
-          title: 'Initial Ideas',
-          content: 'Some starting thoughts:\n\n- Write a short note every day\n- Instead of folders, use links like [[Welcome]]\n- Keep #guide tag for important tips',
-          createdAt: Date.now(),
-          updatedAt: Date.now()
-        };
-        notes[p] = {
-          id: p,
-          title: 'Projects',
-          content: 'Ongoing projects #project\n\n- [[Initial Ideas]]\n- Next week planning',
-          createdAt: Date.now(),
-          updatedAt: Date.now()
-        };
-        currentId = w;
-      }
-
-      async function loadNotes() {
-        try {
-          const val = await storageGet(STORAGE_KEY);
-          if (val) { notes = JSON.parse(val); }
-        } catch (_) {}
-        seedIfEmpty();
-        if (!currentId) {
-          const ids = Object.keys(notes);
-          if (ids.length) currentId = ids[0];
-        }
-      }
-
-      // Utilities
-      function findNoteByTitle(title) {
-        const t = title.trim().toLowerCase();
-        return Object.values(notes).find(n => n.title.trim().toLowerCase() === t);
-      }
-
-      function extractLinkTitles(content) {
-        const set = new Set();
-        const re = /\[\[([^\]]+)\]\]/g;
-        let m;
-        while ((m = re.exec(content))) set.add(m[1].trim());
-        return [...set];
-      }
-
-      function extractTags(content) {
-        const set = new Set();
-        const re = /(?:^|[^\u0600-\u06FFa-zA-Z0-9_])#([\u0600-\u06FFa-zA-Z0-9_\-]{2,})/g;
-        let m;
-        while ((m = re.exec(content || ''))) set.add(m[1]);
-        return [...set];
-      }
-
-      function allTags() {
-        const set = new Set();
-        Object.values(notes).forEach(n => extractTags(n.content).forEach(t => set.add(t)));
-        return [...set].sort();
-      }
-
-      function tagCount(tag) {
-        return Object.values(notes).filter(n => extractTags(n.content).some(t => t.toLowerCase() === tag.toLowerCase()))
-          .length;
-      }
-
-      const TAG_PALETTE = ['#d6a35c', '#6fb3a0', '#9382d6', '#cf6f6f', '#5fa8d3', '#d38fc0', '#8fbf6f', '#e0b84f'];
-
-      function tagColor(tag) {
-        let h = 0;
-        for (let i = 0; i < tag.length; i++) h = (h * 31 + tag.charCodeAt(i)) >>> 0;
-        return TAG_PALETTE[h % TAG_PALETTE.length];
-      }
-
-      function getBacklinks(note) {
-        if (!note) return [];
-        return Object.values(notes).filter(n =>
-          n.id !== note.id && extractLinkTitles(n.content).some(t => t.toLowerCase() === note.title.trim().toLowerCase())
-        );
-      }
-
-      function escapeHtml(s) {
-        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      }
-
-      function renderMarkdown(text) {
-        let html = escapeHtml(text || '');
-        html = html.replace(/\[\[([^\]]+)\]\]/g, (m, p1) => {
-          const exists = findNoteByTitle(p1);
-          return `<a href="#" class="wikilink ${exists?'':'wikilink-new'}" data-title="${p1.replace(/"/g,'&quot;')}">${p1}</a>`;
-        });
-        html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>');
-        html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>');
-        html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>');
-        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-        html = html.replace(/(^|[^\u0600-\u06FFa-zA-Z0-9_])#([\u0600-\u06FFa-zA-Z0-9_\-]{2,})/g, (m, pre, tag) =>
-          `${pre}<span class="tag-inline" style="color:${tagColor(tag)}">#${tag}</span>`);
-        html = html.replace(/^- (.*)$/gm, '<li>$1</li>');
-        html = html.replace(/(?:<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
-        html = html.replace(/^&gt; ?(.*)$/gm, '<blockquote>$1</blockquote>');
-        html = html.replace(/(?:<blockquote>.*<\/blockquote>\n?)+/g, m => m.replace(/\n/g, ''));
-        html = html.split(/\n{2,}/).map(block => {
-          const t = block.trim();
-          if (/^<(h1|h2|h3|ul|blockquote)/.test(t)) return block;
-          if (!t) return '';
-          return `<p>${block.replace(/\n/g,'<br>')}</p>`;
-        }).join('\n');
-        return html;
-      }
-
-      // Modal/Toast
-      let toastTimer = null;
-
-      function showToast(msg, isError) {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.classList.toggle('error', !!isError);
-        t.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
-      }
-
-      function showModal(title, body, buttons) {
-        document.getElementById('modalTitle').textContent = title;
-        document.getElementById('modalBody').textContent = body;
-        const actions = document.getElementById('modalActions');
-        actions.innerHTML = '';
-        buttons.forEach(b => {
-          const btn = document.createElement('button');
-          btn.className = 'modal-btn' + (b.cls ? ' ' + b.cls : '');
-          btn.textContent = b.label;
-          btn.addEventListener('click', () => { closeModal();
-            if (b.onClick) b.onClick(); });
-          actions.appendChild(btn);
-        });
-        document.getElementById('modalBackdrop').classList.add('show');
-      }
-
-      function closeModal() { document.getElementById('modalBackdrop').classList.remove('show'); }
-      document.getElementById('modalBackdrop').addEventListener('click', (e) => { if (e.target.id === 'modalBackdrop')
-          closeModal(); });
-
-      // Note actions
-      function selectNote(id) {
-        currentId = id;
-        editMode = true;
-        render();
-        if (document.body.classList.contains('is-mobile')) closeSidebar();
-      }
-
-      function createNote(titleSeed) {
-        const id = uid();
-        notes[id] = {
-          id,
-          title: titleSeed || 'Untitled note',
-          content: '',
-          createdAt: Date.now(),
-          updatedAt: Date.now()
-        };
-        currentId = id;
-        editMode = true;
-        saveNotes();
-        render();
-        if (document.body.classList.contains('is-mobile')) closeSidebar();
-        setTimeout(() => {
-          const el = document.querySelector('.title-input');
-          if (el) { el.focus();
-            el.select(); }
-        }, 30);
-      }
-
-      function deleteNote(id) {
-        showModal(
-          'Delete note',
-          `Are you sure you want to delete "${notes[id] ? notes[id].title : ''}"? This cannot be undone.`,
-          [{
-            label: 'Delete',
-            cls: 'danger',
-            onClick: () => {
-              delete notes[id];
-              const ids = Object.keys(notes);
-              currentId = ids.length ? ids[0] : null;
-              saveNotes();
-              render();
-              showToast('Note deleted.');
-            }
-          }, { label: 'Cancel', cls: 'ghost' }]
-        );
-      }
-
-      function addTagToCurrent(tag) {
-        tag = (tag || '').trim().replace(/^#/, '');
-        if (!tag || !currentId) return;
-        const note = notes[currentId];
-        const already = extractTags(note.content).some(t => t.toLowerCase() === tag.toLowerCase());
-        if (already) return;
-        const sep = note.content && !note.content.endsWith('\n') ? '\n\n' : '';
-        note.content = (note.content || '') + sep + '#' + tag;
-        note.updatedAt = Date.now();
-        saveNotes();
-        render();
-      }
-
-      function removeTagFromCurrent(tag) {
-        if (!currentId) return;
-        const note = notes[currentId];
-        const re = new RegExp('(^|[^\\u0600-\\u06FFa-zA-Z0-9_])#' + tag.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') +
-          '(?![\\u0600-\\u06FFa-zA-Z0-9_])', 'g');
-        note.content = note.content.replace(re, '$1').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
-        note.updatedAt = Date.now();
-        saveNotes();
-        render();
-      }
-
-      function updateCurrentTitle(v) {
-        if (!currentId) return;
-        notes[currentId].title = v;
-        notes[currentId].updatedAt = Date.now();
-        saveNotes();
-        renderSidebar();
-      }
-
-      function updateCurrentContent(v) {
-        if (!currentId) return;
-        notes[currentId].content = v;
-        notes[currentId].updatedAt = Date.now();
-        saveNotes();
-        renderSidebar();
-        updateTagPanel();
-      }
-
-      function filteredNoteIds() {
-        let ids = Object.keys(notes);
-        if (activeTag) {
-          ids = ids.filter(id => extractTags(notes[id].content).includes(activeTag));
-        }
-        if (searchTerm.trim()) {
-          const q = searchTerm.trim().toLowerCase();
-          ids = ids.filter(id => notes[id].title.toLowerCase().includes(q) || notes[id].content.toLowerCase().includes(q));
-        }
-        return ids.sort((a, b) => notes[b].updatedAt - notes[a].updatedAt);
-      }
-
-      // Render sidebar
-      function renderSidebar() {
-        const list = document.getElementById('noteList');
-        const ids = filteredNoteIds();
-        if (!ids.length) {
-          list.innerHTML = `<div class="empty-hint">No notes found.<br>Create one!</div>`;
-        } else {
-          list.innerHTML = ids.map(id => {
-            const n = notes[id];
-            const snippet = (n.content || '').replace(/[#*`\[\]]/g, '').slice(0, 60) || '';
-            const tags = extractTags(n.content);
-            const tagsHtml = tags.length ?
-              `<div class="mini-tags">${tags.slice(0,4).map(t => {
-                const c = tagColor(t);
-                return `<span class="mini-tag" style="color:${c};background:${c}1a;border-color:${c}44;">#${escapeHtml(t)}</span>`;
-              }).join('')}</div>` :
-              '';
-            return `<div class="note-item ${id===currentId?'selected':''}" data-id="${id}">
-                <div class="t">${escapeHtml(n.title||'Untitled')}</div>
-                <div class="s">${escapeHtml(snippet)}</div>
-                ${tagsHtml}
-              </div>`;
-          }).join('');
-          list.querySelectorAll('.note-item').forEach(el => {
-            el.addEventListener('click', () => selectNote(el.dataset.id));
-          });
-        }
-
-        const body = document.getElementById('tagsBody');
-        const tags = allTags();
-        if (!tags.length) {
-          body.innerHTML = `<span style="font-size:12px;color:var(--text-faint);padding:4px 0;">No tags yet</span>`;
-        } else {
-          body.innerHTML = tags.map(t => {
-            const c = tagColor(t);
-            const active = t === activeTag;
-            return `<span class="tag-chip ${active?'active':''}" data-tag="${escapeHtml(t)}" style="${active?`background:${c};border-color:${c};color:#131318;`:`color:${c};border-color:${c}55;background:${c}1a;`}">#${escapeHtml(t)} <span style="opacity:.6;font-size:9px;">(${tagCount(t)})</span></span>`;
-          }).join('');
-          body.querySelectorAll('.tag-chip').forEach(el => {
-            el.addEventListener('click', () => {
-              activeTag = (activeTag === el.dataset.tag) ? null : el.dataset.tag;
-              render();
-            });
-          });
-        }
-
-        document.getElementById('stats').textContent =
-          `${Object.keys(notes).length} notes · ${allTags().length} tags`;
-        updateChatSub();
-      }
-
-      // Tag panel
-      function updateTagPanel() {
-        const panel = document.getElementById('tagPanel');
-        if (!panel) return;
-        const note = notes[currentId];
-        if (!note) { panel.innerHTML = ''; return; }
-        const curTags = extractTags(note.content);
-        const curTagsLower = new Set(curTags.map(t => t.toLowerCase()));
-        const suggestions = allTags()
-          .filter(t => !curTagsLower.has(t.toLowerCase()))
-          .map(t => ({ t, n: tagCount(t) }))
-          .sort((a, b) => b.n - a.n)
-          .slice(0, 5);
-
-        let html =
-          `<span class="lbl">🏷️ Tags</span>
-          <div class="tag-pills">`;
-        if (curTags.length) {
-          html += curTags.map(t => {
-            const c = tagColor(t);
-            return `<span class="note-tag-pill" style="color:${c};background:${c}1a;border-color:${c}44;border-width:1px;border-style:solid;">
-                <span class="dot" style="width:7px;height:7px;border-radius:50%;background:${c};display:inline-block;box-shadow:0 0 5px ${c}99;"></span>
-                #${escapeHtml(t)}
-                <span class="x" data-tag="${escapeHtml(t)}">✕</span>
-              </span>`;
-          }).join('');
-        } else {
-          html += `<span style="font-size:12px;color:var(--text-faint);">(no tags)</span>`;
-        }
-        html += `</div>
-          <div class="tag-input-wrap">
-            <input class="tag-input" id="tagInput" placeholder="Add tag…" autocomplete="off">
-            <button class="tag-add-btn" id="tagAddBtn">+</button>
-            <div class="tag-suggest" id="tagSuggest"></div>
-          </div>`;
-
-        if (suggestions.length) {
-          html += `<div class="suggest-strip">`;
-          suggestions.forEach(({ t, n }) => {
-            const c = tagColor(t);
-            html +=
-              `<span class="suggest-chip" data-tag="${escapeHtml(t)}" style="color:${c};border-color:${c}66;background:${c}0d;">+ #${escapeHtml(t)} (${n})</span>`;
-          });
-          html += `</div>`;
-        }
-
-        panel.innerHTML = html;
-
-        panel.querySelectorAll('.x').forEach(el => el.addEventListener('click', () => removeTagFromCurrent(el.dataset.tag)));
-        panel.querySelectorAll('.suggest-chip').forEach(el => el.addEventListener('click', () => addTagToCurrent(el.dataset
-          .tag)));
-
-        const input = document.getElementById('tagInput');
-        const suggest = document.getElementById('tagSuggest');
-        const addBtn = document.getElementById('tagAddBtn');
-
-        function renderTagSuggestions() {
-          const q = input.value.trim().toLowerCase();
-          const already = new Set(extractTags(notes[currentId].content).map(t => t.toLowerCase()));
-          let matches = allTags().filter(t => !already.has(t.toLowerCase()));
-          if (q) matches = matches.filter(t => t.toLowerCase().startsWith(q));
-          matches = matches.slice(0, 8);
-
-          let html = '';
-          if (matches.length) {
-            html += matches.map(t => {
-              const c = tagColor(t);
-              return `<div class="tag-suggest-item" data-tag="${escapeHtml(t)}">
-                  <span class="dot" style="background:${c}"></span>#${escapeHtml(t)}
-                  <span class="cnt">${tagCount(t)} notes</span>
-                </div>`;
-            }).join('');
-          } else if (!q) {
-            html +=
-              `<div class="tag-suggest-item" style="color:var(--text-faint);padding:8px 10px;">No suggestions</div>`;
-          }
-          if (q && !allTags().some(t => t.toLowerCase() === q)) {
-            html += `<div class="tag-suggest-item tag-suggest-create" data-tag="${escapeHtml(q)}">
-                <span class="dot" style="background:${tagColor(q)}"></span> Create tag «#${escapeHtml(q)}»
-              </div>`;
-          }
-          suggest.innerHTML = html;
-          suggest.classList.toggle('show', !!html);
-          suggest.querySelectorAll('.tag-suggest-item').forEach(item => {
-            item.addEventListener('click', () => {
-              const tag = item.dataset.tag;
-              addTagToCurrent(tag);
-              input.value = '';
-              suggest.classList.remove('show');
-            });
-          });
-        }
-
-        input.addEventListener('input', renderTagSuggestions);
-        input.addEventListener('focus', renderTagSuggestions);
-        input.addEventListener('keydown', e => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            const tag = input.value.trim().replace(/^#/, '');
-            if (tag) { addTagToCurrent(tag);
-              input.value = '';
-              suggest.classList.remove('show'); }
-          }
-          if (e.key === 'Escape') suggest.classList.remove('show');
-        });
-        addBtn.addEventListener('click', () => {
-          const tag = input.value.trim().replace(/^#/, '');
-          if (tag) { addTagToCurrent(tag);
-            input.value = '';
-            suggest.classList.remove('show'); }
-        });
-        document.addEventListener('click', (e) => {
-          if (panel && !panel.contains(e.target)) suggest.classList.remove('show');
-        });
-      }
-
-      // Render editor
-      function renderEditor() {
-        const pane = document.getElementById('editorPane');
-        const rp = document.getElementById('rightPanel');
-        const note = notes[currentId];
-
-        if (!note) {
-          pane.innerHTML =
-            `<div class="empty-editor">
-              <div class="big">No note selected</div>
-              <div>Select a note from the list or create a new one</div>
-            </div>`;
-          rp.style.display = 'none';
-          return;
-        }
-        rp.style.display = 'block';
-
-        pane.innerHTML = `
-          <div class="editor-toolbar">
-            <input class="title-input" id="titleInput" value="${escapeHtml(note.title)}" placeholder="Untitled note">
-            <div class="mode-toggle ${editMode?'':'read'}" id="modeToggle">
-              <div class="thumb"></div>
-              <button id="modeWrite" class="${editMode?'active':''}">✎ Write</button>
-              <button id="modeRead" class="${!editMode?'active':''}">👁 Read</button>
+    <!-- ===== OVERLAY: تنظیمات اولیه (یکبار) ===== -->
+    <div class="overlay-page" id="settingsPage">
+        <div class="overlay-card">
+            <h2 id="settingsTitle">⚙️ Initial Setup</h2>
+            <p id="settingsDesc">Choose your preferences. This page appears only once.</p>
+
+            <div class="settings-row">
+                <span class="label" id="themeLabel">🌓 Theme</span>
+                <div class="options" id="themeOptions">
+                    <button class="active" data-value="dark">Dark</button>
+                    <button data-value="light">Light</button>
+                </div>
             </div>
-            <button class="icon-btn details-btn" id="detailsBtn" title="Details">ⓘ</button>
-            <button class="icon-btn danger" id="delBtn" title="Delete">✕</button>
-          </div>
-          <div class="editor-body" id="editorBody"></div>
-          <div class="tag-panel" id="tagPanel"></div>
-        `;
 
-        document.getElementById('titleInput').addEventListener('input', e => updateCurrentTitle(e.target.value));
-        document.getElementById('titleInput').addEventListener('blur', renderSidebar);
-        document.getElementById('modeWrite').addEventListener('click', () => { editMode = true;
-          renderEditor(); });
-        document.getElementById('modeRead').addEventListener('click', () => { editMode = false;
-          renderEditor(); });
-        document.getElementById('delBtn').addEventListener('click', () => deleteNote(note.id));
-        document.getElementById('detailsBtn').addEventListener('click', openDetails);
+            <div class="settings-row">
+                <span class="label" id="langLabel">🌐 Language</span>
+                <div class="options" id="langOptions">
+                    <button class="active" data-value="en">English</button>
+                    <button data-value="fa">فارسی</button>
+                </div>
+            </div>
 
-        const body = document.getElementById('editorBody');
-        if (editMode) {
-          const words = (note.content || '').trim() ? note.content.trim().split(/\s+/).length : 0;
-          body.innerHTML =
-            `<textarea class="md-textarea fade-in" id="mdArea" placeholder="Start writing… use [[Note]] for links and #tag for tags">${escapeHtml(note.content)}</textarea>
-            <div class="wordcount-badge" id="wcBadge">${words} words</div>`;
-          const ta = document.getElementById('mdArea');
-          ta.addEventListener('input', e => {
-            updateCurrentContent(e.target.value);
-            const w = e.target.value.trim() ? e.target.value.trim().split(/\s+/).length : 0;
-            document.getElementById('wcBadge').textContent = w + ' words';
-          });
+            <button class="settings-submit" id="settingsSubmit">✅ Continue</button>
+        </div>
+    </div>
 
-          // Markdown toolbar
-          const tb = document.createElement('div');
-          tb.className = 'md-toolbar';
-          tb.style.cssText =
-            'display:flex;gap:4px;padding:8px 16px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;background:rgba(255,255,255,.015);';
-          const tools = [
-            { label: 'H1', before: '# ', after: '', block: true },
-            { label: 'H2', before: '## ', after: '', block: true },
-            { label: 'B', before: '**', after: '**' },
-            { label: '`', before: '`', after: '`' },
-            { label: '•', before: '- ', after: '', block: true },
-            { label: '❝', before: '> ', after: '', block: true },
-            { label: '[[ ]]', before: '[[', after: ']]' },
-            { label: '#', before: '#', after: '' },
-          ];
-          tools.forEach((t) => {
-            const btn = document.createElement('button');
-            btn.className = 'md-tbtn';
-            btn.style.cssText =
-              'background:var(--surface-2);border:1px solid var(--border);color:var(--text-dim);min-width:30px;height:28px;padding:0 8px;border-radius:8px;cursor:pointer;font-family:var(--mono);font-size:11px;display:flex;align-items:center;justify-content:center;transition:.15s;';
-            btn.textContent = t.label;
-            btn.addEventListener('click', () => {
-              const start = ta.selectionStart,
-                end = ta.selectionEnd;
-              const val = ta.value;
-              let insStart = start,
-                insEnd = end;
-              if (t.block) {
-                const lineStart = val.lastIndexOf('\n', start - 1) + 1;
-                ta.value = val.slice(0, lineStart) + t.before + val.slice(lineStart);
-                insStart = start + t.before.length;
-                insEnd = end + t.before.length;
-              } else {
-                const selected = val.slice(start, end);
-                ta.value = val.slice(0, start) + t.before + selected + t.after + val.slice(end);
-                insStart = start + t.before.length;
-                insEnd = insStart + selected.length;
-              }
-              ta.focus();
-              ta.setSelectionRange(insStart, insEnd);
-              updateCurrentContent(ta.value);
-              const w = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
-              document.getElementById('wcBadge').textContent = w + ' words';
-            });
-            tb.appendChild(btn);
-          });
-          const toolbars = body.parentElement;
-          toolbars.insertBefore(tb, body);
-        } else {
-          body.innerHTML =
-            `<div class="preview fade-in">${renderMarkdown(note.content) || '<p style="color:var(--text-faint)">This note is empty.</p>'}</div>`;
-          body.querySelectorAll('a.wikilink').forEach(a => {
-            a.addEventListener('click', (e) => {
-              e.preventDefault();
-              const title = a.dataset.title;
-              const existing = findNoteByTitle(title);
-              if (existing) selectNote(existing.id);
-              else createNote(title);
-            });
-          });
-        }
+    <!-- ===== OVERLAY: صفحه تبلیغات (از گیت) ===== -->
+    <div class="overlay-page" id="bannerPage">
+        <div class="overlay-card">
+            <a class="close-banner" id="closeBannerBtn" href="https://github.com/IQZEUS/brainmain/tree/main" target="_blank">✕</a>
+            <h2 id="bannerTitle">📢 Announcement</h2>
+            <p id="bannerSub" style="font-size:13px;color:#8d8a9a;">Latest news & updates</p>
 
-        updateTagPanel();
-        renderRightPanel(note);
-      }
+            <div class="banner-area" id="bannerArea">
+                <div id="bannerLoader" class="banner-loader">
+                    <div class="spinner"></div>
+                    <div class="spinner-text">Loading content…</div>
+                </div>
+                <div id="bannerContent" style="display:none;"></div>
+            </div>
 
-      // Right panel
-      function renderRightPanel(note) {
-        const rp = document.getElementById('rightPanel');
-        const backlinks = getBacklinks(note);
-        const outgoing = extractLinkTitles(note.content).map(t => ({ title: t, exists: !!findNoteByTitle(t) }));
-        const tags = extractTags(note.content);
-        const wordCount = (note.content || '').trim() ? note.content.trim().split(/\s+/).length : 0;
+            <div class="banner-actions">
+                <button class="btn btn-primary" id="bannerActionBtn">📖 View</button>
+            </div>
+        </div>
+    </div>
 
-        rp.innerHTML = `
-          <div class="rp-section">
-            <div class="rp-title">Linked from</div>
-            ${backlinks.length ? backlinks.map(n=>`<div class="rp-link" data-id="${n.id}">${escapeHtml(n.title)}</div>`).join('') : '<div class="rp-empty">No notes link to this</div>'}
-          </div>
-          <div class="rp-section">
-            <div class="rp-title">Outgoing links</div>
-            ${outgoing.length ? outgoing.map(o=>`<div class="rp-link" data-title="${escapeHtml(o.title)}" style="${o.exists?'':'opacity:.55'}">${escapeHtml(o.title)}${o.exists?'':' (new)'}</div>`).join('') : '<div class="rp-empty">No outgoing links</div>'}
-          </div>
-          <div class="rp-section">
-            <div class="rp-title">Tags</div>
-            ${tags.length ? tags.map(t=>{ const c=tagColor(t); return `<span class="rp-tag" style="color:${c};background:${c}1a;border-color:${c}44;">#${escapeHtml(t)}</span>`; }).join('') : '<div class="rp-empty">No tags</div>'}
-          </div>
-          <div class="rp-section">
-            <div class="rp-title">This note stats</div>
-            <div class="insight-row"><span>Word count</span><b>${wordCount}</b></div>
-            <div class="insight-row"><span>Connections</span><b>${backlinks.length + outgoing.length}</b></div>
-          </div>
-          <div class="rp-section">
-            <div class="rp-title">Brain stats</div>
-            <div class="insight-row"><span>Total notes</span><b>${Object.keys(notes).length}</b></div>
-            <div class="insight-row"><span>Total tags</span><b>${allTags().length}</b></div>
-          </div>
-        `;
-        rp.querySelectorAll('.rp-link[data-id]').forEach(el => el.addEventListener('click', () => selectNote(el.dataset.id)));
-        rp.querySelectorAll('.rp-link[data-title]').forEach(el => {
-          el.addEventListener('click', () => {
-            const title = el.dataset.title;
-            const existing = findNoteByTitle(title);
-            if (existing) selectNote(existing.id);
-            else createNote(title);
-          });
-        });
-      }
+    <!-- ===== برنامه اصلی ===== -->
+    <div id="appRoot">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#5f5d6b;font-size:18px;flex-direction:column;gap:12px;">
+            <div style="font-size:48px;">🧠</div>
+            <div>Second Brain — Ready</div>
+            <div style="font-size:13px;color:#3a3a4a;">(Main app loads here)</div>
+        </div>
+    </div>
 
-      // Graph
-      function renderGraph() {
-        const svg = d3.select('#graphSvg');
-        svg.selectAll('*').remove();
-        const el = document.getElementById('mainGraph');
-        const w = el.clientWidth || 800,
-          h = el.clientHeight || 500;
-        svg.attr('viewBox', `0 0 ${w} ${h}`);
+    <script>
+        (function() {
+            'use strict';
 
-        const allNoteNodes = Object.values(notes).map(n => ({ id: 'note:' + n.id, refId: n.id, title: n.title,
-          kind: 'note' }));
-        const allTagNodes = allTags().map(t => ({ id: 'tag:' + t, refId: t, title: '#' + t, kind: 'tag' }));
-
-        const linkSet = [];
-        Object.values(notes).forEach(n => {
-          extractLinkTitles(n.content).forEach(t => {
-            const target = findNoteByTitle(t);
-            if (target && target.id !== n.id) linkSet.push({ source: 'note:' + n.id, target: 'note:' + target
-                .id, kind: 'link' });
-          });
-          extractTags(n.content).forEach(tag => {
-            linkSet.push({ source: 'note:' + n.id, target: 'tag:' + tag, kind: 'tag' });
-          });
-        });
-
-        let noteNodes = allNoteNodes;
-        let tagNodes = allTagNodes;
-        if (allNoteNodes.length > MAX_GRAPH_NODES) {
-          const connectedIds = new Set();
-          linkSet.forEach(l => {
-            const s = typeof l.source === 'string' ? l.source : l.source.id;
-            const t = typeof l.target === 'string' ? l.target : l.target.id;
-            connectedIds.add(s);
-            connectedIds.add(t);
-          });
-          if (currentId) connectedIds.add('note:' + currentId);
-          noteNodes = allNoteNodes.filter(n => connectedIds.has(n.id));
-          const tagCounts = new Map();
-          linkSet.forEach(l => {
-            if (l.kind === 'tag') {
-              const t = typeof l.target === 'string' ? l.target : l.target.id;
-              tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
+            // ================================================================
+            //  1.  LOADING SCREEN
+            // ================================================================
+            function buildLoadingGraphic() {
+                const pts = [
+                    [110, 30],
+                    [45, 70],
+                    [175, 70],
+                    [30, 125],
+                    [110, 110],
+                    [190, 125],
+                    [110, 150]
+                ];
+                const edges = [
+                    [0, 1],
+                    [0, 2],
+                    [1, 3],
+                    [1, 4],
+                    [2, 4],
+                    [2, 5],
+                    [4, 6],
+                    [4, 3],
+                    [4, 5]
+                ];
+                const colors = ['#d6a35c', '#6fb3a0', '#9382d6', '#6fb3a0', '#d6a35c', '#9382d6', '#6fb3a0'];
+                const lg = document.getElementById('loadLines');
+                const ng = document.getElementById('loadNodes');
+                edges.forEach(([a, b], i) => {
+                    const [x1, y1] = pts[a],
+                        [x2, y2] = pts[b];
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', x1);
+                    line.setAttribute('y1', y1);
+                    line.setAttribute('x2', x2);
+                    line.setAttribute('y2', y2);
+                    line.setAttribute('class', 'ln-edge');
+                    line.style.animationDelay = (i * 0.12) + 's';
+                    lg.appendChild(line);
+                });
+                pts.forEach((p, i) => {
+                    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    c.setAttribute('cx', p[0]);
+                    c.setAttribute('cy', p[1]);
+                    c.setAttribute('r', 4);
+                    c.setAttribute('fill', colors[i % colors.length]);
+                    c.setAttribute('class', 'ln-node');
+                    c.style.animationDelay = (i * 0.15) + 's';
+                    ng.appendChild(c);
+                });
             }
-          });
-          const filteredTagIds = new Set();
-          tagCounts.forEach((count, id) => { if (count >= 2) filteredTagIds.add(id); });
-          if (currentId) {
-            extractTags(notes[currentId].content).forEach(t => filteredTagIds.add('tag:' + t));
-          }
-          tagNodes = allTagNodes.filter(n => filteredTagIds.has(n.id));
-        }
+            buildLoadingGraphic();
 
-        const nodes = [...noteNodes, ...tagNodes];
-        const nodeIds = new Set(nodes.map(n => n.id));
-        const links = linkSet.filter(l => {
-          const s = typeof l.source === 'string' ? l.source : l.source.id;
-          const t = typeof l.target === 'string' ? l.target : l.target.id;
-          return nodeIds.has(s) && nodeIds.has(t);
-        });
+            const loadMsgEl = document.getElementById('loadMsg');
+            const loadingMessages = {
+                en: ['Waking up Second Brain…', 'Loading notes…', 'Building connections…', 'Preparing graph…',
+                    'Final touches…'
+                ],
+                fa: ['در حال بیدار شدن مغز دوم…', 'بارگذاری یادداشت‌ها…', 'ساخت ارتباط بین ایده‌ها…', 'آماده‌سازی گراف دانش…',
+                    'چیدن آخرین تکه‌ها…'
+                ]
+            };
+            let msgIdx = 0;
+            let currentLang = 'en';
 
-        if (!nodes.length) {
-          svg.append('text').attr('x', w / 2).attr('y', h / 2).attr('text-anchor', 'middle')
-            .attr('fill', '#5f5d6b').attr('font-size', '14').text('Nothing to display');
-          return;
-        }
-
-        const defs = svg.append('defs');
-        [
-          ['glowAmber', '#d6a35c'],
-          ['glowTeal', '#6fb3a0'],
-          ['glowViolet', '#9382d6']
-        ].forEach(([id, color]) => {
-          const f = defs.append('filter').attr('id', id).attr('x', '-150%').attr('y', '-150%').attr('width',
-              '400%').attr('height', '400%');
-          f.append('feDropShadow').attr('dx', 0).attr('dy', 0).attr('stdDeviation', 5).attr('flood-color',
-            color).attr('flood-opacity', 0.85);
-        });
-        const vign = defs.append('radialGradient').attr('id', 'vign').attr('cx', '50%').attr('cy', '42%').attr(
-          'r', '75%');
-        vign.append('stop').attr('offset', '0%').attr('stop-color', '#1c1c26');
-        vign.append('stop').attr('offset', '100%').attr('stop-color', '#131318');
-        svg.append('rect').attr('x', 0).attr('y', 0).attr('width', w).attr('height', h).attr('fill',
-          'url(#vign)');
-
-        const starG = svg.append('g').attr('opacity', 0.5);
-        for (let i = 0; i < 35; i++) {
-          starG.append('circle')
-            .attr('cx', Math.random() * w).attr('cy', Math.random() * h)
-            .attr('r', Math.random() * 1.3 + 0.3)
-            .attr('fill', '#4a4a5c');
-        }
-
-        const zoomLayer = svg.append('g');
-
-        const sim = d3.forceSimulation(nodes)
-          .force('link', d3.forceLink(links).id(d => d.id).distance(d => d.kind === 'tag' ? 70 : 100).strength(0.5))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('center', d3.forceCenter(w / 2, h / 2))
-          .force('collide', d3.forceCollide(d => d.kind === 'tag' ? 28 : 40))
-          .alphaDecay(0.025)
-          .velocityDecay(0.45);
-
-        const linkSel = zoomLayer.append('g').selectAll('line').data(links).join('line')
-          .attr('stroke', d => d.kind === 'tag' ? '#4d4560' : '#3a3a4d')
-          .attr('stroke-dasharray', d => d.kind === 'tag' ? '3,4' : '5,4')
-          .attr('stroke-width', 1.2)
-          .attr('class', 'flow-edge');
-
-        const nodeG = zoomLayer.append('g').selectAll('g').data(nodes).join('g')
-          .style('cursor', 'pointer')
-          .call(d3.drag()
-            .on('start', (event, d) => { if (!event.active) sim.alphaTarget(0.3).restart();
-              d.fx = d.x;
-              d.fy = d.y; })
-            .on('drag', (event, d) => { d.fx = event.x;
-              d.fy = event.y; })
-            .on('end', (event, d) => { if (!event.active) sim.alphaTarget(0);
-              d.fx = null;
-              d.fy = null; }));
-
-        nodeG.each(function(d) {
-          const g = d3.select(this);
-          if (d.kind === 'tag') {
-            const uses = links.filter(l => {
-              const t = typeof l.target === 'string' ? l.target : l.target.id;
-              return t === d.id;
-            }).length;
-            g.append('rect')
-              .attr('class', 'node-shape')
-              .attr('x', -(8 + uses)).attr('y', -(8 + uses))
-              .attr('width', (8 + uses) * 2).attr('height', (8 + uses) * 2)
-              .attr('rx', 5)
-              .attr('transform', 'rotate(45)')
-              .attr('fill', '#1a1a22')
-              .attr('fill-opacity', 0.95)
-              .attr('stroke', '#9382d6')
-              .attr('stroke-width', 1.5)
-              .attr('filter', 'url(#glowViolet)');
-          } else {
-            const linkCount = extractLinkTitles(notes[d.refId].content).length + getBacklinks(notes[d.refId])
-              .length;
-            const isCur = d.refId === currentId;
-            g.append('circle')
-              .attr('class', 'node-shape')
-              .attr('r', 9 + Math.min(8, linkCount * 1.2))
-              .attr('fill', isCur ? '#d6a35c' : '#1e2e29')
-              .attr('fill-opacity', isCur ? 0.95 : 0.9)
-              .attr('stroke', isCur ? '#e2b06f' : '#6fb3a0')
-              .attr('stroke-width', isCur ? 2 : 1.5)
-              .attr('filter', isCur ? 'url(#glowAmber)' : 'url(#glowTeal)');
-          }
-        });
-
-        nodeG.append('text')
-          .text(d => d.title.length > 14 ? d.title.slice(0, 13) + '…' : d.title)
-          .attr('text-anchor', 'middle')
-          .attr('dy', d => d.kind === 'tag' ? 24 : 27)
-          .attr('font-size', d => d.kind === 'tag' ? 10 : 11)
-          .attr('font-family', d => d.kind === 'tag' ? "'IBM Plex Mono', monospace" : 'Vazirmatn, sans-serif')
-          .attr('fill', d => d.kind === 'tag' ? '#b3a8e6' : (d.refId === currentId ? '#f0d6a8' : '#c9c6bd'))
-          .attr('font-weight', d => d.refId === currentId ? '600' : '400');
-
-        const neighborMap = new Map();
-        nodes.forEach(n => neighborMap.set(n.id, new Set([n.id])));
-        links.forEach(l => {
-          const s = typeof l.source === 'object' ? l.source.id : l.source;
-          const t = typeof l.target === 'object' ? l.target.id : l.target;
-          neighborMap.get(s).add(t);
-          neighborMap.get(t).add(s);
-        });
-        nodeG.on('mouseenter', function(event, d) {
-          const neigh = neighborMap.get(d.id);
-          nodeG.style('opacity', n => neigh.has(n.id) ? 1 : 0.18);
-          linkSel.style('opacity', l => {
-            const s = typeof l.source === 'object' ? l.source.id : l.source;
-            const t = typeof l.target === 'object' ? l.target.id : l.target;
-            return (s === d.id || t === d.id) ? 0.9 : 0.06;
-          });
-        }).on('mouseleave', function() {
-          nodeG.style('opacity', 1);
-          linkSel.style('opacity', 1);
-        });
-
-        nodeG.on('click', (event, d) => {
-          if (d.kind === 'note') { selectNote(d.refId);
-            showNotes(); } else { activeTag = (activeTag === d.refId) ? null : d.refId;
-            showNotes();
-            renderSidebar(); }
-        });
-
-        sim.on('tick', () => {
-          linkSel
-            .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
-            .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
-          nodeG.attr('transform', d => `translate(${d.x},${d.y})`);
-        });
-
-        svg.call(
-          d3.zoom().scaleExtent([0.4, 3]).on('zoom', (event) => {
-            zoomLayer.attr('transform', event.transform);
-            starG.attr('transform', event.transform);
-          })
-        ).on('dblclick.zoom', null);
-      }
-
-      // Chat
-      function buildNotesContext() {
-        const list = Object.values(notes).sort((a, b) => b.updatedAt - a.updatedAt);
-        let out = '';
-        const BUDGET = 9000;
-        for (const n of list) {
-          const tags = extractTags(n.content);
-          const block =
-            `## ${n.title}\n${n.content || '(empty)'}${tags.length? '\nTags: '+tags.map(t=>'#'+t).join(' ') : ''}\n\n`;
-          if (out.length + block.length > BUDGET) break;
-          out += block;
-        }
-        return out;
-      }
-
-      function renderChat() {
-        const box = document.getElementById('chatMessages');
-        updateChatSub();
-        if (!chatDisplay.length) {
-          box.innerHTML = `<div class="chat-empty">Ask anything about your notes —<br>e.g. "Summarize my projects" or "What connections exist?"</div>`;
-          return;
-        }
-        box.innerHTML = chatDisplay.map(m => {
-          if (m.role === 'user') return `<div class="bubble user">${escapeHtml(m.text)}</div>`;
-          if (m.role === 'error') return `<div class="bubble error">${escapeHtml(m.text)}</div>`;
-          if (m.role === 'typing') return `<div class="bubble assistant typing-dots"><span></span><span></span><span></span></div>`;
-          return `<div class="bubble assistant">${renderMarkdown(m.text)}</div>`;
-        }).join('');
-        box.querySelectorAll('.bubble.assistant a.wikilink').forEach(a => {
-          a.addEventListener('click', (e) => {
-            e.preventDefault();
-            const title = a.dataset.title;
-            const existing = findNoteByTitle(title);
-            if (existing) { selectNote(existing.id);
-              showNotes(); }
-          });
-        });
-        box.scrollTop = box.scrollHeight;
-      }
-
-      async function sendChat() {
-        if (chatBusy) return;
-        const input = document.getElementById('chatInput');
-        const question = input.value.trim();
-        if (!question) return;
-        input.value = '';
-
-        if (chatApiHistory.length === 0) {
-          const ctx = buildNotesContext();
-          const sys = `You are a smart assistant inside a personal note‑taking app called "Second Brain". Below are all the user's notes. Answer concisely and accurately. If you refer to a note, write its title inside [[double brackets]] so it becomes clickable. If the answer is not in the notes, say so honestly.\n\n--- User notes ---\n${ctx || '(no notes yet)'}`;
-          chatApiHistory.push({ role: 'user', content: sys + '\n\n--- User question ---\n' + question });
-        } else {
-          chatApiHistory.push({ role: 'user', content: question });
-        }
-        chatDisplay.push({ role: 'user', text: question });
-        chatDisplay.push({ role: 'typing' });
-        chatBusy = true;
-        document.getElementById('chatSendBtn').disabled = true;
-        renderChat();
-
-        try {
-          let text = '';
-          if (chatProvider === 'ollama') {
-            const base = (ollamaUrl || 'http://localhost:11434').replace(/\/$/, '');
-            const response = await fetch(base + '/api/chat', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                model: ollamaModel || 'qwen2.5-coder',
-                messages: chatApiHistory,
-                stream: false
-              })
-            });
-            if (!response.ok) throw new Error('ollama-http-' + response.status);
-            const data = await response.json();
-            text = (data && data.message && data.message.content) ? data.message.content.trim() : '';
-            chatDisplay.pop();
-            chatApiHistory.push({ role: 'assistant', content: text });
-            chatDisplay.push({ role: 'assistant', text: text || 'No response received.' });
-          } else {
-            const base = (claudeBaseUrl || 'https://api.anthropic.com').replace(/\/$/, '');
-            const headers = { 'Content-Type': 'application/json' };
-            if (claudeApiKey.trim()) {
-              headers['x-api-key'] = claudeApiKey.trim();
-              headers['anthropic-version'] = '2023-06-01';
-              if (base.includes('api.anthropic.com')) headers['anthropic-dangerous-direct-browser-access'] = 'true';
-              headers['Authorization'] = 'Bearer ' + claudeApiKey.trim();
+            function getLoadMessages(lang) {
+                return loadingMessages[lang] || loadingMessages.en;
             }
-            const response = await fetch(base + '/v1/messages', {
-              method: 'POST',
-              headers,
-              body: JSON.stringify({
-                model: 'claude-sonnet-4-6',
-                max_tokens: 1000,
-                messages: chatApiHistory
-              })
-            });
-            const data = await response.json();
-            chatDisplay.pop();
-            if (data && data.content) {
-              text = data.content.map(b => b.type === 'text' ? b.text : '').join('\n').trim();
-              chatApiHistory.push({ role: 'assistant', content: text });
-              chatDisplay.push({ role: 'assistant', text: text || 'No response received.' });
-            } else if (data && data.error) {
-              chatDisplay.push({ role: 'error', text: 'Error: ' + (data.error.message || 'unknown') + (claudeApiKey
-                  .trim() ? '' : ' — API key missing or invalid.') });
-            } else {
-              chatDisplay.push({ role: 'error', text: 'Something went wrong. Please try again.' });
+
+            function updateLoadingMessage(lang) {
+                const msgs = getLoadMessages(lang);
+                loadMsgEl.textContent = msgs[msgIdx % msgs.length];
             }
-          }
-        } catch (e) {
-          chatDisplay.pop();
-          if (chatProvider === 'ollama') {
-            chatDisplay.push({ role: 'error',
-              text: 'Failed to connect to Ollama. Make sure it\'s running with "OLLAMA_ORIGINS=* ollama serve", model is pulled, and URL/model name are correct.' });
-          } else {
-            chatDisplay.push({ role: 'error', text: 'Failed to reach assistant. Please try again.' });
-          }
-        }
-        chatBusy = false;
-        document.getElementById('chatSendBtn').disabled = false;
-        renderChat();
-      }
 
-      document.getElementById('chatSendBtn').addEventListener('click', sendChat);
-      document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
-      document.getElementById('chatClearBtn').addEventListener('click', () => {
-        chatApiHistory = [];
-        chatDisplay = [];
-        renderChat();
-      });
+            const msgInterval = setInterval(() => {
+                const msgs = getLoadMessages(currentLang);
+                msgIdx = (msgIdx + 1) % msgs.length;
+                loadMsgEl.style.opacity = 0;
+                setTimeout(() => {
+                    loadMsgEl.textContent = msgs[msgIdx];
+                    loadMsgEl.style.opacity = 1;
+                }, 200);
+            }, 750);
 
-      function applyProviderUI() {
-        const isOllama = chatProvider === 'ollama';
-        document.getElementById('ollamaFields').style.display = isOllama ? 'inline-flex' : 'none';
-        document.getElementById('ollamaNote').style.display = isOllama ? 'block' : 'none';
-        document.getElementById('claudeFields').style.display = isOllama ? 'none' : 'inline-flex';
-        document.getElementById('claudeNote').style.display = isOllama ? 'none' : 'block';
-        document.getElementById('providerSelect').value = chatProvider;
-        document.getElementById('ollamaModelInput').value = ollamaModel;
-        document.getElementById('ollamaUrlInput').value = ollamaUrl;
-        document.getElementById('claudeKeyInput').value = claudeApiKey;
-        document.getElementById('claudeUrlInput').value = claudeBaseUrl;
-      }
+            function hideLoading() {
+                clearInterval(msgInterval);
+                document.getElementById('loadingScreen').classList.add('hide');
+            }
 
-      document.getElementById('providerSelect').addEventListener('change', e => {
-        chatProvider = e.target.value;
-        chatApiHistory = [];
-        chatDisplay = [];
-        applyProviderUI();
-        renderChat();
-      });
-      document.getElementById('ollamaModelInput').addEventListener('change', e => { ollamaModel = e.target.value.trim() ||
-          'qwen2.5-coder'; });
-      document.getElementById('ollamaUrlInput').addEventListener('change', e => { ollamaUrl = e.target.value.trim() ||
-          'http://localhost:11434'; });
-      document.getElementById('claudeKeyInput').addEventListener('change', e => { claudeApiKey = e.target.value.trim(); });
-      document.getElementById('claudeUrlInput').addEventListener('change', e => { claudeBaseUrl = e.target.value.trim() ||
-          'https://api.anthropic.com'; });
+            // ================================================================
+            //  2.  SETTINGS (one-time)
+            // ================================================================
+            const SETTINGS_KEY = 'second-brain-settings-v1';
 
-      // View switching
-      function showNotes() {
-        document.getElementById('mainNotes').style.display = 'flex';
-        document.getElementById('mainGraph').style.display = 'none';
-        document.getElementById('mainChat').style.display = 'none';
-        document.getElementById('btn-notes').classList.add('active');
-        document.getElementById('btn-graph').classList.remove('active');
-        document.getElementById('btn-chat').classList.remove('active');
-        if (currentId) renderEditor();
-      }
+            function getStoredSettings() {
+                try {
+                    const raw = localStorage.getItem(SETTINGS_KEY);
+                    if (raw) return JSON.parse(raw);
+                } catch (_) {}
+                return null;
+            }
 
-      function showGraph() {
-        document.getElementById('mainNotes').style.display = 'none';
-        document.getElementById('mainGraph').style.display = 'block';
-        document.getElementById('mainChat').style.display = 'none';
-        document.getElementById('btn-notes').classList.remove('active');
-        document.getElementById('btn-graph').classList.add('active');
-        document.getElementById('btn-chat').classList.remove('active');
-        renderGraph();
-      }
+            function saveSettings(settings) {
+                localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+            }
 
-      function showChat() {
-        document.getElementById('mainNotes').style.display = 'none';
-        document.getElementById('mainGraph').style.display = 'none';
-        document.getElementById('mainChat').style.display = 'flex';
-        document.getElementById('btn-notes').classList.remove('active');
-        document.getElementById('btn-graph').classList.remove('active');
-        document.getElementById('btn-chat').classList.add('active');
-        renderChat();
-      }
+            const settingsPage = document.getElementById('settingsPage');
+            const themeBtns = document.querySelectorAll('#themeOptions button');
+            const langBtns = document.querySelectorAll('#langOptions button');
+            const settingsSubmit = document.getElementById('settingsSubmit');
 
-      document.getElementById('btn-notes').addEventListener('click', showNotes);
-      document.getElementById('btn-graph').addEventListener('click', showGraph);
-      document.getElementById('btn-chat').addEventListener('click', showChat);
-
-      // Main render
-      function render() {
-        renderSidebar();
-        if (document.getElementById('mainNotes').style.display !== 'none') {
-          renderEditor();
-        }
-      }
-
-      // Tags collapsible
-      let tagsCollapsed = false;
-      document.getElementById('tagsHeader').addEventListener('click', () => {
-        tagsCollapsed = !tagsCollapsed;
-        document.getElementById('tagsBody').classList.toggle('collapsed', tagsCollapsed);
-        document.getElementById('tagsArrow').classList.toggle('open', !tagsCollapsed);
-      });
-
-      // Export/Import
-      document.getElementById('exportBtn').addEventListener('click', () => {
-        const blob = new Blob([JSON.stringify(notes, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const stamp = new Date().toISOString().slice(0, 10);
-        a.href = url;
-        a.download = `second-brain-backup-${stamp}.json`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      });
-      document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
-      document.getElementById('importFile').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          let imported;
-          try { imported = JSON.parse(reader.result); } catch (_) { showToast('Invalid file.', true); return; }
-          const keys = Object.keys(imported || {});
-          if (!keys.length || imported[keys[0]].title === undefined) {
-            showToast('This is not a Second Brain backup.', true);
-            return;
-          }
-          showModal(
-            'Restore backup',
-            `This file has ${keys.length} notes. Do you want to add them to current notes or replace completely?`, [
-              {
-                label: 'Add to current',
-                cls: 'primary',
-                onClick: () => {
-                  notes = { ...notes, ...imported };
-                  currentId = Object.keys(notes)[0] || null;
-                  saveNotes();
-                  render();
-                  showToast('Note added.');
+            const settingsI18n = {
+                en: {
+                    title: '⚙️ Initial Setup',
+                    desc: 'Choose your preferences. This page appears only once.',
+                    theme: '🌓 Theme',
+                    lang: '🌐 Language',
+                    continue: '✅ Continue'
+                },
+                fa: {
+                    title: '⚙️ تنظیمات اولیه',
+                    desc: 'تنظیمات دلخواه خود را انتخاب کنید. این صفحه فقط یکبار نمایش داده می‌شود.',
+                    theme: '🌓 تم',
+                    lang: '🌐 زبان',
+                    continue: '✅ ادامه'
                 }
-              },
-              {
-                label: 'Replace completely',
-                cls: 'danger',
-                onClick: () => {
-                  notes = imported;
-                  currentId = Object.keys(notes)[0] || null;
-                  saveNotes();
-                  render();
-                  showToast('Notes replaced.');
+            };
+
+            function updateSettingsUI(lang) {
+                const t = settingsI18n[lang] || settingsI18n.en;
+                document.getElementById('settingsTitle').textContent = t.title;
+                document.getElementById('settingsDesc').textContent = t.desc;
+                document.getElementById('themeLabel').textContent = t.theme;
+                document.getElementById('langLabel').textContent = t.lang;
+                settingsSubmit.textContent = t.continue;
+                currentLang = lang;
+                const msgs = getLoadMessages(lang);
+                loadMsgEl.textContent = msgs[0];
+            }
+
+            let selectedTheme = 'dark';
+            let selectedLang = 'en';
+
+            // default: English, Dark
+            langBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === 'en');
+            });
+            themeBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === 'dark');
+            });
+
+            themeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    themeBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedTheme = btn.dataset.value;
+                });
+            });
+            langBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    langBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedLang = btn.dataset.value;
+                    updateSettingsUI(selectedLang);
+                    document.documentElement.dir = selectedLang === 'fa' ? 'rtl' : 'ltr';
+                    document.documentElement.lang = selectedLang;
+                });
+            });
+
+            settingsSubmit.addEventListener('click', () => {
+                const settings = {
+                    theme: selectedTheme,
+                    lang: selectedLang,
+                    configured: true,
+                    timestamp: Date.now()
+                };
+                saveSettings(settings);
+                applyTheme(selectedTheme);
+                applyLang(selectedLang);
+                settingsPage.classList.remove('show');
+                // after settings, show banner
+                showBannerPage(selectedLang);
+            });
+
+            function applyTheme(theme) {
+                if (theme === 'light') {
+                    document.documentElement.style.setProperty('--bg', '#f5f3f0');
+                    document.documentElement.style.setProperty('--surface', '#efede8');
+                    document.documentElement.style.setProperty('--text', '#1e1e24');
+                    document.documentElement.style.setProperty('--text-dim', '#5a5a6a');
+                } else {
+                    document.documentElement.style.setProperty('--bg', '#0e0e14');
+                    document.documentElement.style.setProperty('--surface', '#16161e');
+                    document.documentElement.style.setProperty('--text', '#eae7de');
+                    document.documentElement.style.setProperty('--text-dim', '#8d8a9a');
                 }
-              },
-              { label: 'Cancel', cls: 'ghost' }
-            ]
-          );
-        };
-        reader.onerror = () => showToast('Error reading file.', true);
-        reader.readAsText(file);
-        e.target.value = '';
-      });
+            }
 
-      // Mobile
-      function openSidebar() { document.querySelector('.sidebar').classList.add('open');
-        document.getElementById('drawerBackdrop').classList.add('show'); }
+            function applyLang(lang) {
+                document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+                document.documentElement.lang = lang;
+                currentLang = lang;
+                updateSettingsUI(lang);
+            }
 
-      function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); if (!document.getElementById(
-            'rightPanel').classList.contains('open')) document.getElementById('drawerBackdrop').classList.remove('show'); }
+            // ================================================================
+            //  3.  BANNER — always fetch fresh, ignore cache
+            // ================================================================
+            const bannerPage = document.getElementById('bannerPage');
+            const bannerContent = document.getElementById('bannerContent');
+            const bannerLoader = document.getElementById('bannerLoader');
+            const bannerTitle = document.getElementById('bannerTitle');
+            const bannerSub = document.getElementById('bannerSub');
+            const bannerActionBtn = document.getElementById('bannerActionBtn');
 
-      function openDetails() { document.getElementById('rightPanel').classList.add('open');
-        document.getElementById('drawerBackdrop').classList.add('show'); }
+            const BANNER_URL = 'https://raw.githubusercontent.com/IQZEUS/brainmain/refs/heads/main/banner.json';
 
-      function closeDetails() { document.getElementById('rightPanel').classList.remove('open'); if (!document.querySelector(
-            '.sidebar').classList.contains('open')) document.getElementById('drawerBackdrop').classList.remove('show'); }
+            const defaultBanner = {
+                en: {
+                    title: '📢 Announcement',
+                    sub: 'Latest news & updates',
+                    html: '<div class="placeholder-banner">No content from GitHub yet.<br>Check your BANNER_URL.</div>',
+                    button: { label: '📖 View', link: 'https://github.com/IQZEUS/brainmain' }
+                },
+                fa: {
+                    title: '📢 اطلاع‌رسانی',
+                    sub: 'آخرین اخبار و بروزرسانی‌ها',
+                    html: '<div class="placeholder-banner">محتوایی از گیت دریافت نشد.<br>آدرس BANNER_URL را بررسی کنید.</div>',
+                    button: { label: '📖 مشاهده', link: 'https://github.com/IQZEUS/brainmain' }
+                }
+            };
 
-      document.getElementById('hamburgerBtn').addEventListener('click', () => {
-        document.querySelector('.sidebar').classList.contains('open') ? closeSidebar() : openSidebar();
-      });
-      document.getElementById('drawerBackdrop').addEventListener('click', () => { closeSidebar();
-        closeDetails(); });
+            let isBannerLoading = false;
 
-      const mobileQuery = window.matchMedia('(max-width: 820px), (pointer: coarse) and (max-width: 900px)');
+            function renderBanner(lang, data) {
+                if (!data) {
+                    data = defaultBanner[lang] || defaultBanner.en;
+                }
+                // update all elements from JSON data
+                bannerTitle.textContent = data.title || '📢 Announcement';
+                bannerSub.textContent = data.sub || 'Latest news & updates';
+                bannerContent.innerHTML = data.html || '<div class="placeholder-banner">No content</div>';
+                const btn = data.button || { label: '📖 View', link: '#' };
+                bannerActionBtn.textContent = btn.label || '📖 View';
+                bannerActionBtn.onclick = () => {
+                    if (btn.link && btn.link !== '#') window.open(btn.link, '_blank');
+                    else alert('No link configured.');
+                };
+                // show content, hide loader
+                bannerLoader.style.display = 'none';
+                bannerContent.style.display = 'block';
+            }
 
-      function applyDeviceMode() {
-        const isMobile = mobileQuery.matches || window.innerWidth <= 820;
-        document.body.classList.toggle('is-mobile', isMobile);
-        document.body.classList.toggle('is-desktop', !isMobile);
-        if (!isMobile) { closeSidebar();
-          closeDetails(); }
-      }
-      mobileQuery.addEventListener ? mobileQuery.addEventListener('change', applyDeviceMode) : mobileQuery.addListener(
-        applyDeviceMode);
-      window.addEventListener('resize', applyDeviceMode);
+            async function fetchBanner(lang) {
+                if (isBannerLoading) return;
+                isBannerLoading = true;
 
-      // Loading screen
-      function buildLoadingGraphic() {
-        const pts = [
-          [110, 30],
-          [45, 70],
-          [175, 70],
-          [30, 125],
-          [110, 110],
-          [190, 125],
-          [110, 150]
-        ];
-        const edges = [
-          [0, 1],
-          [0, 2],
-          [1, 3],
-          [1, 4],
-          [2, 4],
-          [2, 5],
-          [4, 6],
-          [4, 3],
-          [4, 5]
-        ];
-        const colors = ['#d6a35c', '#6fb3a0', '#9382d6', '#6fb3a0', '#d6a35c', '#9382d6', '#6fb3a0'];
-        const lg = document.getElementById('loadLines');
-        const ng = document.getElementById('loadNodes');
-        edges.forEach(([a, b], i) => {
-          const [x1, y1] = pts[a],
-            [x2, y2] = pts[b];
-          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          line.setAttribute('x1', x1);
-          line.setAttribute('y1', y1);
-          line.setAttribute('x2', x2);
-          line.setAttribute('y2', y2);
-          line.setAttribute('class', 'ln-edge');
-          line.style.animationDelay = (i * 0.12) + 's';
-          lg.appendChild(line);
-        });
-        pts.forEach((p, i) => {
-          const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          c.setAttribute('cx', p[0]);
-          c.setAttribute('cy', p[1]);
-          c.setAttribute('r', 4);
-          c.setAttribute('fill', colors[i % colors.length]);
-          c.setAttribute('class', 'ln-node');
-          c.style.animationDelay = (i * 0.15) + 's';
-          ng.appendChild(c);
-        });
-      }
+                // show loader, hide content
+                bannerLoader.style.display = 'flex';
+                bannerContent.style.display = 'none';
 
-      function runLoadingMessages() {
-        const msgs = ['Waking up Second Brain…', 'Loading notes…', 'Building connections…', 'Preparing graph…',
-          'Final touches…'
-        ];
-        const el = document.getElementById('loadMsg');
-        let i = 0;
-        el.textContent = msgs[0];
-        return setInterval(() => {
-          i = (i + 1) % msgs.length;
-          el.style.opacity = 0;
-          setTimeout(() => { el.textContent = msgs[i];
-            el.style.opacity = 1; }, 200);
-        }, 750);
-      }
+                try {
+                    // Always fetch fresh with cache-busting timestamp
+                    const cacheBuster = '?t=' + Date.now();
+                    const response = await fetch(BANNER_URL + cacheBuster, {
+                        method: 'GET',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    });
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    const json = await response.json();
+                    // store in cache for offline fallback (but we don't rely on it)
+                    localStorage.setItem('banner-cache', JSON.stringify(json));
+                    const data = json[lang] || json.en;
+                    if (data) {
+                        renderBanner(lang, data);
+                    } else {
+                        renderBanner(lang, defaultBanner[lang] || defaultBanner.en);
+                    }
+                } catch (e) {
+                    console.warn('Failed to fetch banner from GitHub:', e);
+                    // fallback to cache if available, else default
+                    try {
+                        const cached = localStorage.getItem('banner-cache');
+                        if (cached) {
+                            const parsed = JSON.parse(cached);
+                            const data = parsed[lang] || parsed.en;
+                            if (data) {
+                                renderBanner(lang, data);
+                                isBannerLoading = false;
+                                return;
+                            }
+                        }
+                    } catch (_) {}
+                    renderBanner(lang, defaultBanner[lang] || defaultBanner.en);
+                }
+                isBannerLoading = false;
+            }
 
-      function hideLoadingScreen() {
-        document.getElementById('loadingScreen').classList.add('hide');
-      }
+            function showBannerPage(lang) {
+                bannerPage.classList.add('show');
+                // start fetching immediately
+                fetchBanner(lang);
+            }
 
-      buildLoadingGraphic();
-      const loadingMsgTimer = runLoadingMessages();
+            // ================================================================
+            //  4.  INIT
+            // ================================================================
+            (async function init() {
+                // show loading screen for at least 1.5s for smooth transition
+                await new Promise(r => setTimeout(r, 1500));
+                hideLoading();
 
-      // ================================================================
-      //  INIT
-      // ================================================================
-      (async function init() {
-        applyDeviceMode();
-        const start = Date.now();
+                const settings = getStoredSettings();
+                if (!settings || !settings.configured) {
+                    // first time → show settings
+                    updateSettingsUI('en');
+                    settingsPage.classList.add('show');
+                } else {
+                    // apply saved settings
+                    applyTheme(settings.theme || 'dark');
+                    applyLang(settings.lang || 'en');
+                    // show banner
+                    showBannerPage(settings.lang || 'en');
+                }
+            })();
 
-        await loadNotes();
-
-        const s = getStoredSettings();
-        if (!s || !s.configured) {
-          // Show settings page first
-          applyLang('en');
-          settingsPage.classList.add('show');
-        } else {
-          applyTheme(s.theme || 'dark');
-          applyLang(s.lang || 'en');
-          // Show banner after settings
-          showBannerPage(s.lang || 'en');
-        }
-
-        applyProviderUI();
-        // Initial render (if settings already done)
-        if (s && s.configured) {
-          render();
-        }
-
-        const elapsed = Date.now() - start;
-        const minShow = 1000;
-        setTimeout(() => {
-          clearInterval(loadingMsgTimer);
-          hideLoadingScreen();
-        }, Math.max(0, minShow - elapsed));
-      })();
-
-      document.getElementById('newNoteBtn').addEventListener('click', () => createNote());
-      document.getElementById('search').addEventListener('input', e => { searchTerm = e.target.value;
-        renderSidebar(); });
-
-      // Reset for testing
-      window.resetSettings = function() {
-        localStorage.removeItem(SETTINGS_KEY);
-        localStorage.removeItem('banner-cache');
-        location.reload();
-      };
-
-    })();
-  </script>
+            // ================================================================
+            //  Reset for testing:
+            //  localStorage.removeItem('second-brain-settings-v1');
+            //  localStorage.removeItem('banner-cache');
+            //  location.reload();
+            // ================================================================
+        })();
+    </script>
 </body>
 </html>
