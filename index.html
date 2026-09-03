@@ -1,239 +1,43 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Second Brain · مغز دوم</title>
+    <title>مغز دوم · بنر</title>
     <style>
-        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        html,
         body {
-            height: 100%;
             background: #0e0e14;
             color: #eae7de;
             font-family: 'Segoe UI', 'Vazirmatn', sans-serif;
-            font-size: 15px;
-            overflow: hidden;
-        }
-        body {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* ===== LOADING ===== */
-        #loadingScreen {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background: #0e0e14;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
-            transition: opacity 0.45s ease, visibility 0.45s ease;
-        }
-        #loadingScreen.hide {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        .load-brand {
-            font-family: 'Fraunces', serif;
-            font-weight: 600;
-            font-size: 20px;
-        }
-        .load-msg {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 12px;
-            color: #5f5d6b;
-        }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(214, 163, 92, 0.15);
-            border-top-color: #d6a35c;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* ===== OVERLAY ===== */
-        .overlay-page {
-            position: fixed;
-            inset: 0;
-            z-index: 8000;
-            background: rgba(14, 14, 20, 0.92);
-            backdrop-filter: blur(12px);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            opacity: 0;
-            transform: scale(0.97);
-            pointer-events: none;
-            transition: opacity 0.35s ease, transform 0.35s ease;
+            direction: rtl;
         }
-        .overlay-page.show {
-            opacity: 1;
-            transform: scale(1);
-            pointer-events: auto;
-        }
-        .overlay-card {
+        .banner-card {
+            max-width: 600px;
+            width: 100%;
             background: #1a1a24;
             border: 1px solid #323242;
             border-radius: 20px;
-            padding: 32px 36px;
-            max-width: 520px;
-            width: 100%;
+            padding: 32px 28px;
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
-            max-height: 90vh;
-            overflow-y: auto;
             position: relative;
         }
-        .overlay-card h2 {
-            font-family: 'Fraunces', serif;
-            font-size: 24px;
-            text-align: center;
-            margin-bottom: 12px;
-        }
-        .overlay-card p {
-            color: #8d8a9a;
-            font-size: 14px;
-            text-align: center;
-            line-height: 1.8;
-            margin-bottom: 20px;
-        }
-
-        /* ===== SETTINGS ===== */
-        .settings-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #2a2a38;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .settings-row .label {
-            font-weight: 500;
-            color: #c9c6bd;
-            font-size: 14px;
-        }
-        .settings-row .options {
-            display: flex;
-            gap: 6px;
-            background: #1e1e28;
-            border-radius: 30px;
-            padding: 3px;
-            border: 1px solid #323242;
-        }
-        .settings-row .options button {
-            background: transparent;
-            border: none;
-            color: #8d8a9a;
-            font-size: 13px;
-            padding: 6px 16px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-family: inherit;
-            transition: 0.15s;
-        }
-        .settings-row .options button.active {
-            background: #d6a35c;
-            color: #0e0e14;
-            font-weight: 600;
-            box-shadow: 0 2px 12px rgba(214, 163, 92, 0.3);
-        }
-        .settings-row .options button:hover:not(.active) {
-            color: #eae7de;
-        }
-        .settings-submit {
-            width: 100%;
-            margin-top: 16px;
-            background: #d6a35c;
-            color: #0e0e14;
-            border: none;
-            border-radius: 14px;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-            transition: 0.15s;
-        }
-        .settings-submit:hover {
-            background: #e2b06f;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(214, 163, 92, 0.3);
-        }
-
-        /* ===== BANNER ===== */
-        .banner-area {
-            margin: 12px 0 18px;
-            border-radius: 16px;
-            overflow: hidden;
-            background: #1e1e28;
-            border: 1px solid #323242;
-            min-height: 140px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 20px;
-            text-align: center;
-        }
-        .banner-area img {
-            max-width: 100%;
-            max-height: 200px;
-            object-fit: contain;
-            border-radius: 8px;
-        }
-        .placeholder-banner {
-            color: #5f5d6b;
-            font-size: 13px;
-        }
-        .banner-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 14px;
-            justify-content: center;
-        }
-        .banner-actions .btn {
-            padding: 10px 28px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            font-family: inherit;
-            transition: 0.15s;
-        }
-        .banner-actions .btn-primary {
-            background: #d6a35c;
-            color: #0e0e14;
-        }
-        .banner-actions .btn-primary:hover {
-            background: #e2b06f;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(214, 163, 92, 0.3);
-        }
-        .close-banner {
+        .banner-card .close {
             position: absolute;
             top: 16px;
-            right: 16px;
+            left: 16px;
             background: transparent;
             border: none;
             color: #5f5d6b;
@@ -241,25 +45,90 @@
             cursor: pointer;
             transition: 0.15s;
             line-height: 1;
-            z-index: 10;
             text-decoration: none;
         }
-        .close-banner:hover {
+        .banner-card .close:hover {
             color: #cf6f6f;
             transform: rotate(90deg);
         }
-        [dir="rtl"] .close-banner {
-            right: auto;
-            left: 16px;
+        .banner-card h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 6px;
+            color: #eae7de;
         }
-
-        .lang-switcher {
+        .banner-card .sub {
+            text-align: center;
+            color: #8d8a9a;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .banner-content {
+            background: #1e1e28;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0 18px;
+            border: 1px solid #323242;
+            min-height: 80px;
+            text-align: center;
+        }
+        .banner-content img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .banner-actions {
+            display: flex;
+            justify-content: center;
+        }
+        .banner-actions .btn {
+            background: #d6a35c;
+            color: #0e0e14;
+            border: none;
+            padding: 10px 32px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            font-family: inherit;
+        }
+        .banner-actions .btn:hover {
+            background: #e2b06f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(214, 163, 92, 0.3);
+        }
+        .status {
+            text-align: center;
+            font-size: 12px;
+            color: #5f5d6b;
+            margin-top: 12px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: #1e1e28;
+            border: 1px solid #323242;
+        }
+        .status.success {
+            color: #6fb3a0;
+            border-color: #6fb3a0;
+        }
+        .status.error {
+            color: #cf6f6f;
+            border-color: #cf6f6f;
+        }
+        .status.info {
+            color: #9382d6;
+            border-color: #9382d6;
+        }
+        .lang-switch {
             display: flex;
             gap: 6px;
             justify-content: center;
             margin-top: 14px;
         }
-        .lang-switcher button {
+        .lang-switch button {
             background: transparent;
             border: 1px solid #323242;
             color: #8d8a9a;
@@ -270,131 +139,119 @@
             font-family: inherit;
             transition: 0.15s;
         }
-        .lang-switcher button.active {
+        .lang-switch button.active {
             background: #d6a35c;
             color: #0e0e14;
             border-color: #d6a35c;
             font-weight: 600;
         }
-        .lang-switcher button:hover:not(.active) {
+        .lang-switch button:hover:not(.active) {
             border-color: #d6a35c;
             color: #eae7de;
         }
-
-        #appRoot {
-            display: none;
-            flex: 1;
-            flex-direction: column;
-            min-height: 0;
+        .loader {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(214, 163, 92, 0.15);
+            border-top-color: #d6a35c;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 10px auto;
         }
-        #appRoot.visible {
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .hidden {
+            display: none !important;
+        }
+        .flex-center {
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
         }
-
-        .manual-link {
+        .retry-btn {
+            background: transparent;
+            border: 1px solid #6fb3a0;
             color: #6fb3a0;
-            text-decoration: underline;
+            padding: 6px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            transition: 0.15s;
+        }
+        .retry-btn:hover {
+            background: rgba(111, 179, 160, 0.1);
+        }
+        .version-badge {
+            font-size: 11px;
+            color: #3a3a4a;
+            text-align: center;
+            margin-top: 8px;
             cursor: pointer;
         }
-        .manual-link:hover {
-            color: #8dd0c0;
+        .version-badge:hover {
+            color: #6fb3a0;
         }
-
-        @media (max-width: 640px) {
-            .overlay-card {
-                padding: 24px 18px;
-                margin: 10px;
-            }
-            .settings-row {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 6px;
-            }
-            .settings-row .options {
-                align-self: stretch;
-                justify-content: center;
-            }
-            .banner-actions .btn {
-                flex: 1;
-                justify-content: center;
-            }
-            .close-banner {
-                top: 12px;
-                right: 12px;
-            }
-            [dir="rtl"] .close-banner {
-                right: auto;
-                left: 12px;
-            }
-            .lang-switcher button {
-                font-size: 12px;
-                padding: 3px 12px;
-            }
+        .test-result {
+            margin-top: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+            background: #1a1a2a;
+            border: 1px solid #2a2a3a;
+        }
+        .test-result.pass {
+            border-color: #6fb3a0;
+            color: #6fb3a0;
+        }
+        .test-result.fail {
+            border-color: #cf6f6f;
+            color: #cf6f6f;
+        }
+        .test-result.info {
+            border-color: #9382d6;
+            color: #9382d6;
+        }
+        .test-result i {
+            margin-left: 6px;
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== LOADING ===== -->
-    <div id="loadingScreen">
-        <div class="spinner"></div>
-        <div class="load-brand">Second Brain</div>
-        <div class="load-msg" id="loadMsg">Waking up…</div>
-    </div>
+    <div class="banner-card" id="bannerCard">
+        <a class="close" id="closeBtn" href="index2.html">✕</a>
+        <h2 id="bannerTitle">📢 در حال بارگذاری…</h2>
+        <p class="sub" id="bannerSub">لطفاً چند لحظه صبر کنید</p>
 
-    <!-- ===== SETTINGS (first time only) ===== -->
-    <div class="overlay-page" id="settingsPage">
-        <div class="overlay-card">
-            <h2 id="settingsTitle">⚙️ Initial Setup</h2>
-            <p id="settingsDesc">Choose your preferences. This page appears only once.</p>
-            <div class="settings-row">
-                <span class="label" id="themeLabel">🌓 Theme</span>
-                <div class="options" id="themeOptions">
-                    <button class="active" data-value="dark">Dark</button>
-                    <button data-value="light">Light</button>
-                </div>
+        <div class="banner-content" id="bannerContent">
+            <div class="flex-center" id="loaderWrap">
+                <div class="loader"></div>
+                <span style="color:#8d8a9a;font-size:13px;">دریافت از GitHub…</span>
             </div>
-            <div class="settings-row">
-                <span class="label" id="langLabel">🌐 Language</span>
-                <div class="options" id="langOptions">
-                    <button class="active" data-value="en">English</button>
-                    <button data-value="fa">فارسی</button>
-                </div>
-            </div>
-            <button class="settings-submit" id="settingsSubmit">✅ Continue</button>
+            <div id="bannerHtml" class="hidden"></div>
         </div>
-    </div>
 
-    <!-- ===== BANNER ===== -->
-    <div class="overlay-page" id="bannerPage">
-        <div class="overlay-card">
-            <a class="close-banner" id="closeBannerBtn" href="index2.html">✕</a>
-            <h2 id="bannerTitle">📢 Loading…</h2>
-            <p id="bannerSub" style="font-size:13px;color:#8d8a9a;">Fetching from GitHub…</p>
-            <div class="banner-area" id="bannerArea">
-                <div id="bannerLoader" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
-                    <div class="spinner"></div>
-                    <div style="color:#8d8a9a;font-size:13px;">Loading content…</div>
-                </div>
-                <div id="bannerContent" style="display:none;"></div>
-            </div>
-            <div class="banner-actions">
-                <button class="btn btn-primary" id="bannerActionBtn">📖 View</button>
-            </div>
-            <div class="lang-switcher">
-                <button id="langEn" class="active">English</button>
-                <button id="langFa">فارسی</button>
-            </div>
+        <div class="banner-actions">
+            <button class="btn" id="actionBtn">مشاهده</button>
         </div>
-    </div>
 
-    <!-- ===== MAIN APP placeholder ===== -->
-    <div id="appRoot">
-        <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#5f5d6b;font-size:18px;flex-direction:column;gap:12px;">
-            <div style="font-size:48px;">🧠</div>
-            <div>Second Brain — Ready</div>
-            <div style="font-size:13px;color:#3a3a4a;">(Main app loads here)</div>
+        <div class="status" id="statusMsg">در حال اتصال…</div>
+
+        <!-- نتیجه تست مقایسه با گیت‌هاب -->
+        <div class="test-result" id="testResult">⏳ در حال بررسی…</div>
+
+        <div class="lang-switch">
+            <button id="langFa" class="active">فارسی</button>
+            <button id="langEn">English</button>
         </div>
+        <div class="version-badge" id="versionBadge">📦 نسخه: v1.0.0 · کلیک برای بروزرسانی</div>
     </div>
 
     <script>
@@ -402,306 +259,295 @@
             'use strict';
 
             // ============================================================
-            // SETTINGS (one-time)
-            // ============================================================
-            const SETTINGS_KEY = 'second-brain-settings-v1';
-
-            function getStoredSettings() {
-                try {
-                    const raw = localStorage.getItem(SETTINGS_KEY);
-                    if (raw) return JSON.parse(raw);
-                } catch (_) {}
-                return null;
-            }
-
-            function saveSettings(settings) {
-                localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-            }
-
-            let selectedTheme = 'dark';
-            let selectedLang = 'en';
-
-            const stored = getStoredSettings();
-            if (stored && stored.configured) {
-                selectedTheme = stored.theme || 'dark';
-                selectedLang = stored.lang || 'en';
-            }
+            //  🔥 نسخه فایل — هر بار که فایل JS را تغییر می‌دهید،
+            //  این عدد را افزایش دهید تا کش مرورگر و CDN دور زده شود
+            //  ============================================================
+            const FILE_VERSION = '2.0.3'; // <-- این عدد را هر بار تغییر دهید
 
             // ============================================================
-            // LOADING
-            // ============================================================
-            const loadMsgEl = document.getElementById('loadMsg');
-            const loadingMessages = ['Waking up…', 'Loading banner…', 'Almost ready…'];
-            let msgIdx = 0;
-            const msgInterval = setInterval(() => {
-                msgIdx = (msgIdx + 1) % loadingMessages.length;
-                loadMsgEl.style.opacity = 0;
-                setTimeout(() => {
-                    loadMsgEl.textContent = loadingMessages[msgIdx];
-                    loadMsgEl.style.opacity = 1;
-                }, 200);
-            }, 600);
-
-            function hideLoading() {
-                clearInterval(msgInterval);
-                document.getElementById('loadingScreen').classList.add('hide');
-            }
+            //  آدرس فایل JS با نسخه
+            //  ============================================================
+            const JS_URL = 'https://cdn.jsdelivr.net/gh/IQZEUS/brainmain@main/banner.js?v=' + FILE_VERSION;
+            const RAW_URL = 'https://raw.githubusercontent.com/IQZEUS/brainmain/refs/heads/main/banner.js';
 
             // ============================================================
-            // BANNER FETCH – دریافت مستقیم از GitHub
+            //  DOM REFS
             // ============================================================
-            const BANNER_RAW = 'https://raw.githubusercontent.com/IQZEUS/brainmain/refs/heads/main/banner.json';
+            const titleEl = document.getElementById('bannerTitle');
+            const subEl = document.getElementById('bannerSub');
+            const htmlContainer = document.getElementById('bannerHtml');
+            const loaderWrap = document.getElementById('loaderWrap');
+            const actionBtn = document.getElementById('actionBtn');
+            const statusMsg = document.getElementById('statusMsg');
+            const langFa = document.getElementById('langFa');
+            const langEn = document.getElementById('langEn');
+            const closeBtn = document.getElementById('closeBtn');
+            const versionBadge = document.getElementById('versionBadge');
+            const testResult = document.getElementById('testResult');
 
-            const bannerPage = document.getElementById('bannerPage');
-            const bannerTitle = document.getElementById('bannerTitle');
-            const bannerSub = document.getElementById('bannerSub');
-            const bannerContent = document.getElementById('bannerContent');
-            const bannerLoader = document.getElementById('bannerLoader');
-            const bannerActionBtn = document.getElementById('bannerActionBtn');
+            let currentLang = 'fa';
+            let bannerData = null;
+            let isFetching = false;
 
-            function renderBanner(lang, data) {
+            // ============================================================
+            //  RENDER — فقط از داده‌های دریافتی
+            // ============================================================
+            function render(lang, data) {
                 if (!data) {
-                    bannerTitle.textContent = '⚠️ No Data';
-                    bannerSub.textContent = 'Failed to load from GitHub';
-                    bannerContent.innerHTML = `
-                        <div class="placeholder-banner">
-                            No content received from GitHub.<br>
-                            <span style="font-size:12px;color:#5f5d6b;">
-                                Try opening the JSON file directly:
-                                <a href="${BANNER_RAW}" target="_blank" class="manual-link">${BANNER_RAW}</a>
-                                <br>Then click Retry below.
-                            </span>
-                        </div>
+                    titleEl.textContent = '⚠️ خطا';
+                    subEl.textContent = 'داده‌ای دریافت نشد';
+                    htmlContainer.classList.add('hidden');
+                    loaderWrap.classList.remove('hidden');
+                    loaderWrap.innerHTML = `
+                        <span style="color:#cf6f6f;font-size:14px;">❌ داده‌ای دریافت نشد</span>
+                        <span style="font-size:12px;color:#5f5d6b;">فایل JS خالی یا نامعتبر است</span>
+                        <button class="retry-btn" id="retryBtn">🔄 تلاش مجدد</button>
                     `;
-                    bannerActionBtn.textContent = '🔄 Retry';
-                    bannerActionBtn.onclick = () => fetchBanner(lang);
-                    bannerLoader.style.display = 'none';
-                    bannerContent.style.display = 'block';
+                    document.getElementById('retryBtn')?.addEventListener('click', () => fetchBanner(currentLang));
+                    actionBtn.textContent = 'تلاش مجدد';
+                    actionBtn.onclick = () => fetchBanner(currentLang);
+                    statusMsg.textContent = 'خطا: داده‌ای وجود ندارد';
+                    statusMsg.className = 'status error';
                     return;
                 }
 
-                // All good – render
-                bannerTitle.textContent = data.title || '📢 Announcement';
-                bannerSub.textContent = data.sub || 'Latest news & updates';
-                bannerContent.innerHTML = data.html || '<div class="placeholder-banner">No content</div>';
+                titleEl.textContent = data.title || '📢 Announcement';
+                subEl.textContent = data.sub || 'Latest news & updates';
+                htmlContainer.innerHTML = data.html || '<div class="placeholder">No content</div>';
+                htmlContainer.classList.remove('hidden');
+                loaderWrap.classList.add('hidden');
 
                 const btn = data.button || { label: '📖 View', link: '#' };
-                bannerActionBtn.textContent = btn.label || '📖 View';
-                bannerActionBtn.onclick = () => {
-                    if (btn.link && btn.link !== '#') window.open(btn.link, '_blank');
-                    else alert('No link configured in GitHub data.');
+                actionBtn.textContent = btn.label || '📖 View';
+                actionBtn.onclick = () => {
+                    if (btn.link && btn.link !== '#') {
+                        window.open(btn.link, '_blank');
+                    } else {
+                        alert('لینکی تنظیم نشده است.');
+                    }
                 };
 
-                bannerLoader.style.display = 'none';
-                bannerContent.style.display = 'block';
+                statusMsg.textContent = '✅ بارگذاری موفق · نسخه ' + FILE_VERSION;
+                statusMsg.className = 'status success';
+                versionBadge.textContent = '📦 نسخه: ' + FILE_VERSION + ' · کلیک برای بروزرسانی';
             }
 
-            let isFetching = false;
+            // ============================================================
+            //  تست مقایسه با فایل RAW گیت‌هاب (با مدیریت خطا)
+            // ============================================================
+            async function testAgainstGitHub() {
+                try {
+                    testResult.textContent = '⏳ مقایسه با گیت‌هاب…';
+                    testResult.className = 'test-result';
+
+                    const response = await fetch(RAW_URL + '?t=' + Date.now(), {
+                        cache: 'reload',
+                        headers: { 'Cache-Control': 'no-cache' }
+                    });
+
+                    if (!response.ok) {
+                        // اگر خطا داشت، فقط یه پیام اطلاع‌رسانی نشون بده
+                        testResult.innerHTML = 'ℹ️ امکان مقایسه با گیت‌هاب وجود ندارد (محدودیت CORS)';
+                        testResult.className = 'test-result info';
+                        return;
+                    }
+
+                    const rawText = await response.text();
+                    const match = rawText.match(/window\.BANNER_DATA\s*=\s*({[\s\S]*?});/);
+                    if (!match) throw new Error('ساختار نامعتبر');
+                    const rawData = JSON.parse(match[1]);
+
+                    const currentData = bannerData || {};
+                    const isMatch = JSON.stringify(currentData) === JSON.stringify(rawData);
+
+                    if (isMatch) {
+                        testResult.innerHTML = '✅ فایل با گیت‌هاب هم‌خوانی دارد';
+                        testResult.className = 'test-result pass';
+                    } else {
+                        testResult.innerHTML = '⚠️ فایل با گیت‌هاب هم‌خوانی ندارد!<br><span style="font-size:11px;color:#8d8a9a;">نسخه محلی با نسخه گیت‌هاب متفاوت است.</span>';
+                        testResult.className = 'test-result fail';
+                    }
+
+                    const versionMatch = rawText.match(/FILE_VERSION\s*=\s*['"]([^'"]+)['"]/);
+                    if (versionMatch) {
+                        testResult.innerHTML += `<br><span style="font-size:10px;color:#5f5d6b;">نسخه گیت‌هاب: ${versionMatch[1]}</span>`;
+                    }
+
+                } catch (e) {
+                    // در صورت هر گونه خطا (از جمله CORS)، فقط پیام اطلاع‌رسانی نشون بده
+                    console.warn('مقایسه با گیت‌هاب انجام نشد:', e.message);
+                    testResult.innerHTML = 'ℹ️ امکان مقایسه با گیت‌هاب وجود ندارد (مشکل شبکه یا CORS)';
+                    testResult.className = 'test-result info';
+                }
+            }
+
+            // ============================================================
+            //  FETCH — بارگذاری داینامیک فایل JS با نسخه‌گذاری
+            // ============================================================
+            function loadScript(url) {
+                return new Promise((resolve, reject) => {
+                    const oldScript = document.querySelector('script[data-banner-script]');
+                    if (oldScript) oldScript.remove();
+
+                    const script = document.createElement('script');
+                    script.src = url;
+                    script.setAttribute('data-banner-script', 'true');
+                    script.crossOrigin = 'anonymous';
+                    script.onload = () => {
+                        if (window.BANNER_DATA) {
+                            resolve(window.BANNER_DATA);
+                        } else {
+                            reject(new Error('BANNER_DATA not found'));
+                        }
+                    };
+                    script.onerror = () => reject(new Error('Script load error'));
+                    document.head.appendChild(script);
+                });
+            }
 
             async function fetchBanner(lang) {
                 if (isFetching) return;
                 isFetching = true;
 
-                bannerLoader.style.display = 'flex';
-                bannerContent.style.display = 'none';
-
-                const loaderText = bannerLoader.querySelector('div:last-child');
-                if (loaderText) loaderText.textContent = 'دریافت از GitHub… ' + new Date().toLocaleTimeString();
+                // نمایش لودینگ
+                titleEl.textContent = '⏳ در حال بارگذاری…';
+                subEl.textContent = 'دریافت از GitHub (نسخه ' + FILE_VERSION + ')';
+                htmlContainer.classList.add('hidden');
+                loaderWrap.classList.remove('hidden');
+                loaderWrap.innerHTML = `
+                    <div class="loader"></div>
+                    <span style="color:#8d8a9a;font-size:13px;">دریافت از GitHub…</span>
+                `;
+                actionBtn.textContent = '…';
+                statusMsg.textContent = 'در حال دریافت نسخه ' + FILE_VERSION + '…';
+                statusMsg.className = 'status';
 
                 try {
-                    // دریافت مستقیم با کش‌شکنی
-                    const response = await fetch(BANNER_RAW + '?t=' + Date.now(), {
-                        method: 'GET',
-                        cache: 'reload',
-                        headers: {
-                            'Cache-Control': 'no-cache, no-store, must-revalidate',
-                            'Pragma': 'no-cache',
-                            'Expires': '0'
-                        }
-                    });
-
-                    if (!response.ok) throw new Error('HTTP ' + response.status);
-                    
-                    const text = await response.text();
-                    const json = JSON.parse(text);
-
-                    // ذخیره در کش برای مواقع آفلاین
+                    const json = await loadScript(JS_URL);
                     localStorage.setItem('banner-cache', JSON.stringify(json));
-
+                    localStorage.setItem('banner-version', FILE_VERSION);
+                    bannerData = json;
                     const data = json[lang] || json.en;
-                    renderBanner(lang, data);
+                    render(lang, data);
+                    updateLangButtons(lang);
+                    statusMsg.textContent = '✅ دریافت موفق · نسخه ' + FILE_VERSION;
+                    statusMsg.className = 'status success';
 
-                } catch (err) {
-                    console.warn('خطا در دریافت از GitHub:', err);
-                    
-                    // fallback: استفاده از کش
+                    // بعد از دریافت، تست مقایسه انجام بده (خطاهای آن مدیریت می‌شود)
+                    await testAgainstGitHub();
+
+                } catch (e) {
+                    console.warn('خطا در بارگذاری JS:', e);
                     try {
+                        const cachedVersion = localStorage.getItem('banner-version');
                         const cached = localStorage.getItem('banner-cache');
-                        if (cached) {
-                            const parsed = JSON.parse(cached);
-                            const data = parsed[lang] || parsed.en;
+                        if (cached && cachedVersion === FILE_VERSION) {
+                            const cachedJson = JSON.parse(cached);
+                            bannerData = cachedJson;
+                            const data = cachedJson[lang] || cachedJson.en;
                             if (data) {
-                                renderBanner(lang, data);
+                                render(lang, data);
+                                updateLangButtons(lang);
+                                statusMsg.textContent = '⚠️ استفاده از کش (نسخه ' + FILE_VERSION + ')';
+                                statusMsg.className = 'status info';
+                                await testAgainstGitHub();
                                 isFetching = false;
                                 return;
                             }
                         }
                     } catch (_) {}
-                    
-                    renderBanner(lang, null);
+                    render(lang, null);
+                    statusMsg.textContent = '❌ خطا در بارگذاری فایل JS';
+                    statusMsg.className = 'status error';
+                    testResult.innerHTML = '❌ خطا: ' + e.message;
+                    testResult.className = 'test-result fail';
                 }
 
                 isFetching = false;
             }
 
-            function showBannerPage(lang) {
-                bannerPage.classList.add('show');
-                document.querySelectorAll('.lang-switcher button').forEach(btn => {
-                    btn.classList.toggle('active', (btn.id === 'langEn' && lang === 'en') || (btn.id === 'langFa' &&
-                        lang === 'fa'));
-                });
-                fetchBanner(lang);
-            }
-
             // ============================================================
-            // LANGUAGE SWITCHER
+            //  LANGUAGE SWITCH
             // ============================================================
-            document.getElementById('langEn').addEventListener('click', function() {
-                if (selectedLang === 'en') return;
-                selectedLang = 'en';
-                const settings = getStoredSettings() || { theme: selectedTheme, lang: 'en', configured: true };
-                settings.lang = 'en';
-                saveSettings(settings);
-                document.documentElement.dir = 'ltr';
-                document.documentElement.lang = 'en';
-                document.querySelectorAll('.lang-switcher button, #langOptions button').forEach(b => {
-                    b.classList.toggle('active', b.dataset.value === 'en' || b.id === 'langEn');
-                });
-                fetchBanner('en');
-            });
-
-            document.getElementById('langFa').addEventListener('click', function() {
-                if (selectedLang === 'fa') return;
-                selectedLang = 'fa';
-                const settings = getStoredSettings() || { theme: selectedTheme, lang: 'fa', configured: true };
-                settings.lang = 'fa';
-                saveSettings(settings);
-                document.documentElement.dir = 'rtl';
-                document.documentElement.lang = 'fa';
-                document.querySelectorAll('.lang-switcher button, #langOptions button').forEach(b => {
-                    b.classList.toggle('active', b.dataset.value === 'fa' || b.id === 'langFa');
-                });
-                fetchBanner('fa');
-            });
-
-            // ============================================================
-            // SETTINGS UI
-            // ============================================================
-            const settingsPage = document.getElementById('settingsPage');
-            const themeBtns = document.querySelectorAll('#themeOptions button');
-            const langBtns = document.querySelectorAll('#langOptions button');
-            const settingsSubmit = document.getElementById('settingsSubmit');
-
-            const settingsI18n = {
-                en: {
-                    title: '⚙️ Initial Setup',
-                    desc: 'Choose your preferences. This page appears only once.',
-                    theme: '🌓 Theme',
-                    lang: '🌐 Language',
-                    continue: '✅ Continue'
-                },
-                fa: {
-                    title: '⚙️ تنظیمات اولیه',
-                    desc: 'تنظیمات دلخواه خود را انتخاب کنید. این صفحه فقط یکبار نمایش داده می‌شود.',
-                    theme: '🌓 تم',
-                    lang: '🌐 زبان',
-                    continue: '✅ ادامه'
+            function updateLangButtons(lang) {
+                langFa.classList.toggle('active', lang === 'fa');
+                langEn.classList.toggle('active', lang === 'en');
+                currentLang = lang;
+                document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+                document.documentElement.lang = lang;
+                if (bannerData) {
+                    const data = bannerData[lang] || bannerData.en;
+                    render(lang, data);
                 }
-            };
-
-            function updateSettingsUI(lang) {
-                const t = settingsI18n[lang] || settingsI18n.en;
-                document.getElementById('settingsTitle').textContent = t.title;
-                document.getElementById('settingsDesc').textContent = t.desc;
-                document.getElementById('themeLabel').textContent = t.theme;
-                document.getElementById('langLabel').textContent = t.lang;
-                settingsSubmit.textContent = t.continue;
             }
 
-            updateSettingsUI(selectedLang);
-            langBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.value === selectedLang));
-            themeBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.value === selectedTheme));
-
-            themeBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    themeBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    selectedTheme = btn.dataset.value;
-                });
-            });
-            langBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    langBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    selectedLang = btn.dataset.value;
-                    updateSettingsUI(selectedLang);
-                    document.documentElement.dir = selectedLang === 'fa' ? 'rtl' : 'ltr';
-                    document.documentElement.lang = selectedLang;
-                });
-            });
-
-            settingsSubmit.addEventListener('click', () => {
-                const settings = {
-                    theme: selectedTheme,
-                    lang: selectedLang,
-                    configured: true,
-                    timestamp: Date.now()
-                };
-                saveSettings(settings);
-                if (selectedTheme === 'light') {
-                    document.documentElement.style.setProperty('--bg', '#f5f3f0');
-                    document.documentElement.style.setProperty('--surface', '#efede8');
-                    document.documentElement.style.setProperty('--text', '#1e1e24');
-                    document.documentElement.style.setProperty('--text-dim', '#5a5a6a');
+            langFa.addEventListener('click', () => {
+                if (currentLang === 'fa') return;
+                currentLang = 'fa';
+                updateLangButtons('fa');
+                if (bannerData) {
+                    const data = bannerData.fa || bannerData.en;
+                    render('fa', data);
                 } else {
-                    document.documentElement.style.setProperty('--bg', '#0e0e14');
-                    document.documentElement.style.setProperty('--surface', '#16161e');
-                    document.documentElement.style.setProperty('--text', '#eae7de');
-                    document.documentElement.style.setProperty('--text-dim', '#8d8a9a');
+                    fetchBanner('fa');
                 }
-                settingsPage.classList.remove('show');
-                showBannerPage(selectedLang);
+            });
+
+            langEn.addEventListener('click', () => {
+                if (currentLang === 'en') return;
+                currentLang = 'en';
+                updateLangButtons('en');
+                if (bannerData) {
+                    const data = bannerData.en || bannerData.fa;
+                    render('en', data);
+                } else {
+                    fetchBanner('en');
+                }
             });
 
             // ============================================================
-            // INIT
+            //  CLOSE BUTTON
+            // ============================================================
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'index2.html';
+            });
+
+            // ============================================================
+            //  FORCE REFRESH
+            // ============================================================
+            versionBadge.addEventListener('click', function() {
+                if (confirm('بارگذاری مجدد با آخرین نسخه از GitHub؟')) {
+                    localStorage.removeItem('banner-cache');
+                    localStorage.removeItem('banner-version');
+                    testResult.innerHTML = '⏳ در حال بروزرسانی…';
+                    testResult.className = 'test-result';
+                    fetchBanner(currentLang);
+                }
+            });
+
+            // ============================================================
+            //  INIT
             // ============================================================
             (async function init() {
-                await new Promise(r => setTimeout(r, 1500));
-                hideLoading();
-
-                const settings = getStoredSettings();
-                if (!settings || !settings.configured) {
-                    settingsPage.classList.add('show');
-                } else {
-                    if (settings.theme === 'light') {
-                        document.documentElement.style.setProperty('--bg', '#f5f3f0');
-                        document.documentElement.style.setProperty('--surface', '#efede8');
-                        document.documentElement.style.setProperty('--text', '#1e1e24');
-                        document.documentElement.style.setProperty('--text-dim', '#5a5a6a');
+                // بررسی کش با نسخه
+                try {
+                    const cachedVersion = localStorage.getItem('banner-version');
+                    const cached = localStorage.getItem('banner-cache');
+                    if (cached && cachedVersion === FILE_VERSION) {
+                        const json = JSON.parse(cached);
+                        bannerData = json;
+                        const data = json[currentLang] || json.en;
+                        render(currentLang, data);
+                        statusMsg.textContent = '📦 از کش · نسخه ' + FILE_VERSION;
+                        statusMsg.className = 'status info';
                     }
-                    document.documentElement.dir = settings.lang === 'fa' ? 'rtl' : 'ltr';
-                    document.documentElement.lang = settings.lang || 'en';
-                    showBannerPage(settings.lang || 'en');
-                }
+                } catch (_) {}
+
+                // دریافت از شبکه
+                await fetchBanner(currentLang);
             })();
 
-            // ============================================================
-            // RESET (for testing):
-            //  localStorage.removeItem('second-brain-settings-v1');
-            //  localStorage.removeItem('banner-cache');
-            //  location.reload();
-            // ============================================================
         })();
     </script>
 </body>
