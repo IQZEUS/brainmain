@@ -3,9 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>مغز دوم · بنر</title>
     <style>
         * {
@@ -13,8 +10,16 @@
             padding: 0;
             box-sizing: border-box;
         }
+
+        html, body {
+            height: 100%;
+        }
+
         body {
-            background: #0e0e14;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(147, 130, 214, 0.15), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(214, 163, 92, 0.12), transparent 40%),
+                #08080d;
             color: #eae7de;
             font-family: 'Segoe UI', 'Vazirmatn', sans-serif;
             min-height: 100vh;
@@ -23,274 +28,611 @@
             justify-content: center;
             padding: 20px;
             direction: rtl;
+            transition: background 0.3s, color 0.3s;
         }
-        .banner-card {
-            max-width: 600px;
+
+        body.theme-light {
+            background:
+                radial-gradient(circle at 20% 20%, rgba(147, 130, 214, 0.08), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(214, 163, 92, 0.08), transparent 40%),
+                #f3f1ea;
+            color: #24232b;
+        }
+
+        /* ============================================================
+           کارت مشترک (پایه‌ی هر دو حالت: setup و بنر)
+           ============================================================ */
+        .card {
+            max-width: 620px;
             width: 100%;
-            background: #1a1a24;
-            border: 1px solid #323242;
-            border-radius: 20px;
-            padding: 32px 28px;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+            background: linear-gradient(180deg, rgba(30, 30, 42, 0.9), rgba(18, 18, 26, 0.9));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 36px 32px;
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.65),
+                0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+                0 1px 0 rgba(255, 255, 255, 0.05) inset;
             position: relative;
+            overflow: hidden;
+            animation: rise 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
-        .banner-card .close {
+
+        body.theme-light .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(250, 249, 245, 0.9));
+            border-color: rgba(0, 0, 0, 0.06);
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.12),
+                0 1px 0 rgba(255, 255, 255, 0.6) inset;
+        }
+
+        .card::before {
+            content: '';
             position: absolute;
-            top: 16px;
-            left: 16px;
-            background: transparent;
-            border: none;
-            color: #5f5d6b;
-            font-size: 24px;
-            cursor: pointer;
-            transition: 0.15s;
-            line-height: 1;
-            text-decoration: none;
+            top: -60%;
+            right: -30%;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(214, 163, 92, 0.25), transparent 70%);
+            pointer-events: none;
         }
-        .banner-card .close:hover {
-            color: #cf6f6f;
-            transform: rotate(90deg);
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(14px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .banner-card h2 {
-            font-family: 'Fraunces', serif;
-            font-size: 24px;
+
+        .fade-swap {
+            animation: fadeSwap 0.35s ease;
+        }
+
+        @keyframes fadeSwap {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(147, 130, 214, 0.18), rgba(214, 163, 92, 0.18));
+            border: 1px solid rgba(214, 163, 92, 0.3);
+            color: #e2c491;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin: 0 auto 16px;
+            width: fit-content;
+            letter-spacing: 0.3px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ============================================================
+           SETUP VIEW (پرسش زبان و تم)
+           ============================================================ */
+        #setupView h1 {
+            font-size: 22px;
+            font-weight: 700;
             text-align: center;
             margin-bottom: 6px;
-            color: #eae7de;
+            background: linear-gradient(90deg, #f2ede0, #d6a35c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .banner-card .sub {
+
+        body.theme-light #setupView h1 {
+            background: linear-gradient(90deg, #6b4a1e, #d6a35c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #setupView .lead {
             text-align: center;
-            color: #8d8a9a;
+            color: #a5a2b3;
             font-size: 14px;
-            margin-bottom: 16px;
+            margin-bottom: 28px;
         }
-        .banner-content {
-            background: #1e1e28;
-            border-radius: 12px;
-            padding: 16px;
-            margin: 12px 0 18px;
-            border: 1px solid #323242;
-            min-height: 80px;
+
+        body.theme-light #setupView .lead {
+            color: #6a677a;
+        }
+
+        .section {
+            margin-bottom: 22px;
+        }
+
+        .section-label {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #8d8a9a;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        body.theme-light .section-label {
+            color: #6a677a;
+        }
+
+        .options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .option-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            color: #c8c5d3;
+            padding: 14px 10px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            transition: 0.18s;
+        }
+
+        body.theme-light .option-btn {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #4a4756;
+        }
+
+        .option-btn .icon {
+            font-size: 22px;
+        }
+
+        .option-btn:hover {
+            border-color: rgba(214, 163, 92, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .option-btn.selected {
+            background: linear-gradient(135deg, rgba(214, 163, 92, 0.18), rgba(147, 130, 214, 0.12));
+            border-color: #d6a35c;
+            color: #f2ede0;
+            box-shadow: 0 6px 18px rgba(214, 163, 92, 0.18);
+        }
+
+        body.theme-light .option-btn.selected {
+            color: #3a2c12;
+        }
+
+        .continue-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #e2b06f, #d6a35c);
+            color: #14140f;
+            border: none;
+            padding: 13px;
+            border-radius: 16px;
+            font-size: 14.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            box-shadow: 0 8px 24px rgba(214, 163, 92, 0.25);
+            margin-top: 6px;
+        }
+
+        .continue-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(214, 163, 92, 0.4);
+            filter: brightness(1.06);
+        }
+
+        .continue-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .hint {
             text-align: center;
+            font-size: 11.5px;
+            color: #5f5d6b;
+            margin-top: 14px;
         }
+
+        body.theme-light .hint {
+            color: #9a97a8;
+        }
+
+        /* ============================================================
+           BANNER VIEW (تبلیغات)
+           ============================================================ */
+        #bannerView .close {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            color: #9d9aac;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            line-height: 1;
+            text-decoration: none;
+            z-index: 2;
+        }
+
+        #bannerView .close:hover {
+            color: #ff8a8a;
+            border-color: rgba(255, 138, 138, 0.4);
+            background: rgba(255, 138, 138, 0.08);
+            transform: rotate(90deg);
+        }
+
+        #bannerView h2 {
+            font-size: 25px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #f2ede0, #d6a35c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.4;
+        }
+
+        body.theme-light #bannerView h2 {
+            background: linear-gradient(90deg, #6b4a1e, #d6a35c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #bannerView .sub {
+            text-align: center;
+            color: #a5a2b3;
+            font-size: 14.5px;
+            margin-bottom: 22px;
+        }
+
+        body.theme-light #bannerView .sub {
+            color: #6a677a;
+        }
+
+        .banner-content {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 18px;
+            margin: 0 0 24px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            min-height: 90px;
+            text-align: center;
+            position: relative;
+        }
+
+        body.theme-light .banner-content {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+
         .banner-content img {
             max-width: 100%;
             max-height: 200px;
             object-fit: contain;
-            border-radius: 8px;
+            border-radius: 10px;
         }
+
         .banner-actions {
             display: flex;
             justify-content: center;
         }
+
         .banner-actions .btn {
-            background: #d6a35c;
-            color: #0e0e14;
+            position: relative;
+            background: linear-gradient(135deg, #e2b06f, #d6a35c);
+            color: #14140f;
             border: none;
-            padding: 10px 32px;
+            padding: 12px 38px;
             border-radius: 30px;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 14.5px;
+            font-weight: 700;
             cursor: pointer;
-            transition: 0.15s;
+            transition: 0.2s;
             font-family: inherit;
+            box-shadow: 0 8px 24px rgba(214, 163, 92, 0.25);
         }
+
         .banner-actions .btn:hover {
-            background: #e2b06f;
             transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(214, 163, 92, 0.3);
+            box-shadow: 0 12px 32px rgba(214, 163, 92, 0.4);
+            filter: brightness(1.06);
         }
+
+        .banner-actions .btn:active {
+            transform: translateY(0);
+        }
+
         .status {
             text-align: center;
-            font-size: 12px;
-            color: #5f5d6b;
-            margin-top: 12px;
-            padding: 6px 12px;
-            border-radius: 8px;
-            background: #1e1e28;
-            border: 1px solid #323242;
+            font-size: 12.5px;
+            color: #7d7a8c;
+            margin-top: 16px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: 0.25s;
         }
+
+        body.theme-light .status {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: rgba(0, 0, 0, 0.06);
+            color: #6a677a;
+        }
+
         .status.success {
-            color: #6fb3a0;
-            border-color: #6fb3a0;
+            color: #7fd6bd;
+            border-color: rgba(127, 214, 189, 0.3);
+            background: rgba(127, 214, 189, 0.06);
         }
+
         .status.error {
-            color: #cf6f6f;
-            border-color: #cf6f6f;
+            color: #ff8a8a;
+            border-color: rgba(255, 138, 138, 0.3);
+            background: rgba(255, 138, 138, 0.06);
         }
+
         .status.info {
-            color: #9382d6;
-            border-color: #9382d6;
+            color: #b3a3ec;
+            border-color: rgba(179, 163, 236, 0.3);
+            background: rgba(179, 163, 236, 0.06);
         }
-        .lang-switch {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-            margin-top: 14px;
-        }
-        .lang-switch button {
-            background: transparent;
-            border: 1px solid #323242;
-            color: #8d8a9a;
-            padding: 4px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 13px;
-            font-family: inherit;
-            transition: 0.15s;
-        }
-        .lang-switch button.active {
-            background: #d6a35c;
-            color: #0e0e14;
-            border-color: #d6a35c;
-            font-weight: 600;
-        }
-        .lang-switch button:hover:not(.active) {
-            border-color: #d6a35c;
-            color: #eae7de;
-        }
+
         .loader {
             display: inline-block;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border: 3px solid rgba(214, 163, 92, 0.15);
             border-top-color: #d6a35c;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin: 10px auto;
+            margin: 12px auto;
         }
+
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
         }
-        .hidden {
-            display: none !important;
-        }
+
         .flex-center {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
         }
+
         .retry-btn {
-            background: transparent;
-            border: 1px solid #6fb3a0;
-            color: #6fb3a0;
-            padding: 6px 20px;
+            background: rgba(127, 214, 189, 0.08);
+            border: 1px solid rgba(127, 214, 189, 0.35);
+            color: #7fd6bd;
+            padding: 7px 22px;
             border-radius: 20px;
             cursor: pointer;
             font-size: 13px;
             font-family: inherit;
-            transition: 0.15s;
+            transition: 0.2s;
         }
+
         .retry-btn:hover {
-            background: rgba(111, 179, 160, 0.1);
-        }
-        .version-badge {
-            font-size: 11px;
-            color: #3a3a4a;
-            text-align: center;
-            margin-top: 8px;
-            cursor: pointer;
-        }
-        .version-badge:hover {
-            color: #6fb3a0;
-        }
-        .test-result {
-            margin-top: 12px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            text-align: center;
-            background: #1a1a2a;
-            border: 1px solid #2a2a3a;
-        }
-        .test-result.pass {
-            border-color: #6fb3a0;
-            color: #6fb3a0;
-        }
-        .test-result.fail {
-            border-color: #cf6f6f;
-            color: #cf6f6f;
-        }
-        .test-result.info {
-            border-color: #9382d6;
-            color: #9382d6;
-        }
-        .test-result i {
-            margin-left: 6px;
+            background: rgba(127, 214, 189, 0.16);
+            transform: translateY(-1px);
         }
     </style>
 </head>
 <body>
 
-    <div class="banner-card" id="bannerCard">
-        <a class="close" id="closeBtn" href="index2.html">✕</a>
-        <h2 id="bannerTitle">📢 در حال بارگذاری…</h2>
-        <p class="sub" id="bannerSub">لطفاً چند لحظه صبر کنید</p>
+    <div class="card" id="card">
 
-        <div class="banner-content" id="bannerContent">
-            <div class="flex-center" id="loaderWrap">
-                <div class="loader"></div>
-                <span style="color:#8d8a9a;font-size:13px;">دریافت از GitHub…</span>
+        <!-- ============================================================
+             حالت اول: پرسیدن زبان و تم (فقط دفعه‌ی اول نمایش داده می‌شه)
+             ============================================================ -->
+        <div id="setupView">
+            <div class="badge">🧠 مغز دوم</div>
+            <h1 id="titleText">خوش‌آمدید</h1>
+            <p class="lead" id="leadText">قبل از شروع، ترجیحاتت رو انتخاب کن</p>
+
+            <div class="section">
+                <span class="section-label" id="langLabel">زبان</span>
+                <div class="options">
+                    <button class="option-btn" data-type="lang" data-value="fa">
+                        <span class="icon">🇮🇷</span>
+                        <span>فارسی</span>
+                    </button>
+                    <button class="option-btn" data-type="lang" data-value="en">
+                        <span class="icon">🇬🇧</span>
+                        <span>English</span>
+                    </button>
+                </div>
             </div>
-            <div id="bannerHtml" class="hidden"></div>
+
+            <div class="section">
+                <span class="section-label" id="themeLabel">تم</span>
+                <div class="options">
+                    <button class="option-btn" data-type="theme" data-value="dark">
+                        <span class="icon">🌙</span>
+                        <span id="darkLabel">تاریک</span>
+                    </button>
+                    <button class="option-btn" data-type="theme" data-value="light">
+                        <span class="icon">☀️</span>
+                        <span id="lightLabel">روشن</span>
+                    </button>
+                </div>
+            </div>
+
+            <button class="continue-btn" id="continueBtn" disabled>ادامه</button>
+            <p class="hint" id="hintText">این پرسش فقط یک‌بار نمایش داده می‌شه</p>
         </div>
 
-        <div class="banner-actions">
-            <button class="btn" id="actionBtn">مشاهده</button>
+        <!-- ============================================================
+             حالت دوم: خود بنر (بعد از انتخاب، یا مستقیم اگه قبلاً انتخاب شده)
+             ============================================================ -->
+        <div id="bannerView" class="hidden">
+            <a class="close" id="closeBtn" href="index2.html">✕</a>
+
+            <div class="badge">🧠 مغز دوم</div>
+            <h2 id="bannerTitle">در حال بارگذاری…</h2>
+            <p class="sub" id="bannerSub">لطفاً چند لحظه صبر کنید</p>
+
+            <div class="banner-content" id="bannerContent">
+                <div class="flex-center" id="loaderWrap">
+                    <div class="loader"></div>
+                    <span style="color:#8d8a9a;font-size:13px;">دریافت از GitHub…</span>
+                </div>
+                <div id="bannerHtml" class="hidden"></div>
+            </div>
+
+            <div class="banner-actions">
+                <button class="btn" id="actionBtn">مشاهده</button>
+            </div>
+
+            <div class="status" id="statusMsg">در حال اتصال…</div>
         </div>
 
-        <div class="status" id="statusMsg">در حال اتصال…</div>
-
-        <!-- نتیجه تست مقایسه با گیت‌هاب -->
-        <div class="test-result" id="testResult">⏳ در حال بررسی…</div>
-
-        <div class="lang-switch">
-            <button id="langFa" class="active">فارسی</button>
-            <button id="langEn">English</button>
-        </div>
-        <div class="version-badge" id="versionBadge">📦 نسخه: v1.0.0 · کلیک برای بروزرسانی</div>
     </div>
 
     <script>
-        (function() {
-            'use strict';
+        (function () {
+            const ONBOARDING_KEY = 'brain-onboarding';
+            const CACHE_KEY = 'banner-cache';
+            const CACHE_TIME_KEY = 'banner-cache-time';
+            const FETCH_TIMEOUT_MS = 6000;
 
-            // ============================================================
-            //  🔥 نسخه فایل — هر بار که فایل JS را تغییر می‌دهید،
-            //  این عدد را افزایش دهید تا کش مرورگر و CDN دور زده شود
-            //  ============================================================
-            const FILE_VERSION = '2.0.3'; // <-- این عدد را هر بار تغییر دهید
-
-            // ============================================================
-            //  آدرس فایل JS با نسخه
-            //  ============================================================
-            const JS_URL = 'https://cdn.jsdelivr.net/gh/IQZEUS/brainmain@main/banner.js?v=' + FILE_VERSION;
-            const RAW_URL = 'https://raw.githubusercontent.com/IQZEUS/brainmain/refs/heads/main/banner.js';
+            const GH_USER = 'IQZEUS';
+            const GH_REPO = 'brainmain';
+            const GH_BRANCH = 'main';
+            const GH_FILE = 'banner.js';
+            const SOURCES = [
+                `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/refs/heads/${GH_BRANCH}/${GH_FILE}`,
+                `https://cdn.jsdelivr.net/gh/${GH_USER}/${GH_REPO}@${GH_BRANCH}/${GH_FILE}`,
+                `https://cdn.statically.io/gh/${GH_USER}/${GH_REPO}/${GH_BRANCH}/${GH_FILE}`
+            ];
 
             // ============================================================
             //  DOM REFS
             // ============================================================
+            const setupView = document.getElementById('setupView');
+            const bannerView = document.getElementById('bannerView');
+            const continueBtn = document.getElementById('continueBtn');
+
             const titleEl = document.getElementById('bannerTitle');
             const subEl = document.getElementById('bannerSub');
             const htmlContainer = document.getElementById('bannerHtml');
             const loaderWrap = document.getElementById('loaderWrap');
             const actionBtn = document.getElementById('actionBtn');
             const statusMsg = document.getElementById('statusMsg');
-            const langFa = document.getElementById('langFa');
-            const langEn = document.getElementById('langEn');
             const closeBtn = document.getElementById('closeBtn');
-            const versionBadge = document.getElementById('versionBadge');
-            const testResult = document.getElementById('testResult');
 
+            let selectedLang = null;
+            let selectedTheme = null;
             let currentLang = 'fa';
             let bannerData = null;
             let isFetching = false;
 
+            const TEXT = {
+                fa: {
+                    title: 'خوش‌آمدید', lead: 'قبل از شروع، ترجیحاتت رو انتخاب کن',
+                    langLabel: 'زبان', themeLabel: 'تم', dark: 'تاریک', light: 'روشن',
+                    continueBtn: 'ادامه', hint: 'این پرسش فقط یک‌بار نمایش داده می‌شه'
+                },
+                en: {
+                    title: 'Welcome', lead: 'Before we start, pick your preferences',
+                    langLabel: 'Language', themeLabel: 'Theme', dark: 'Dark', light: 'Light',
+                    continueBtn: 'Continue', hint: 'This will only be shown once'
+                }
+            };
+
+            function applySetupUiLang(lang) {
+                const t = TEXT[lang] || TEXT.fa;
+                document.getElementById('titleText').textContent = t.title;
+                document.getElementById('leadText').textContent = t.lead;
+                document.getElementById('langLabel').textContent = t.langLabel;
+                document.getElementById('themeLabel').textContent = t.themeLabel;
+                document.getElementById('darkLabel').textContent = t.dark;
+                document.getElementById('lightLabel').textContent = t.light;
+                continueBtn.textContent = t.continueBtn;
+                document.getElementById('hintText').textContent = t.hint;
+            }
+
+            function applyDocLangDir(lang) {
+                document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+                document.documentElement.lang = lang;
+            }
+
+            function applyTheme(theme) {
+                document.body.classList.toggle('theme-light', theme === 'light');
+            }
+
             // ============================================================
-            //  RENDER — فقط از داده‌های دریافتی
+            //  SETUP VIEW — انتخاب گزینه‌ها
+            // ============================================================
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const type = btn.dataset.type;
+                    const value = btn.dataset.value;
+
+                    document.querySelectorAll(`.option-btn[data-type="${type}"]`)
+                        .forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+
+                    if (type === 'lang') {
+                        selectedLang = value;
+                        applySetupUiLang(value);
+                        applyDocLangDir(value);
+                    } else if (type === 'theme') {
+                        selectedTheme = value;
+                        applyTheme(value);
+                    }
+
+                    continueBtn.disabled = !(selectedLang && selectedTheme);
+                });
+            });
+
+            continueBtn.addEventListener('click', () => {
+                if (!selectedLang || !selectedTheme) return;
+                try {
+                    localStorage.setItem(ONBOARDING_KEY, JSON.stringify({
+                        lang: selectedLang, theme: selectedTheme, done: true, savedAt: Date.now()
+                    }));
+                } catch (_) {}
+                showBanner(selectedLang, selectedTheme);
+            });
+
+            // ============================================================
+            //  انتقال به حالت بنر — بدون رفتن به فایل دیگه، همون صفحه
+            // ============================================================
+            function showBanner(lang, theme) {
+                currentLang = lang;
+                applyDocLangDir(lang);
+                applyTheme(theme);
+
+                setupView.classList.add('hidden');
+                bannerView.classList.remove('hidden');
+                bannerView.classList.add('fade-swap');
+
+                fetchBanner(currentLang);
+            }
+
+            // ============================================================
+            //  RENDER بنر
             // ============================================================
             function render(lang, data) {
                 if (!data) {
@@ -299,8 +641,8 @@
                     htmlContainer.classList.add('hidden');
                     loaderWrap.classList.remove('hidden');
                     loaderWrap.innerHTML = `
-                        <span style="color:#cf6f6f;font-size:14px;">❌ داده‌ای دریافت نشد</span>
-                        <span style="font-size:12px;color:#5f5d6b;">فایل JS خالی یا نامعتبر است</span>
+                        <span style="color:#ff8a8a;font-size:14px;">❌ اتصال به هیچ‌کدام از منابع برقرار نشد</span>
+                        <span style="font-size:12px;color:#5f5d6b;">و کش قبلی هم موجود نیست</span>
                         <button class="retry-btn" id="retryBtn">🔄 تلاش مجدد</button>
                     `;
                     document.getElementById('retryBtn')?.addEventListener('click', () => fetchBanner(currentLang));
@@ -326,226 +668,128 @@
                         alert('لینکی تنظیم نشده است.');
                     }
                 };
-
-                statusMsg.textContent = '✅ بارگذاری موفق · نسخه ' + FILE_VERSION;
-                statusMsg.className = 'status success';
-                versionBadge.textContent = '📦 نسخه: ' + FILE_VERSION + ' · کلیک برای بروزرسانی';
             }
 
-            // ============================================================
-            //  تست مقایسه با فایل RAW گیت‌هاب (با مدیریت خطا)
-            // ============================================================
-            async function testAgainstGitHub() {
-                try {
-                    testResult.textContent = '⏳ مقایسه با گیت‌هاب…';
-                    testResult.className = 'test-result';
+            async function tryFetch(url) {
+                const bustUrl = url + (url.includes('?') ? '&' : '?') +
+                    't=' + Date.now() + '&r=' + Math.random().toString(36).substring(2, 8);
 
-                    const response = await fetch(RAW_URL + '?t=' + Date.now(), {
-                        cache: 'reload',
-                        headers: { 'Cache-Control': 'no-cache' }
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('تایم‌اوت (' + (FETCH_TIMEOUT_MS / 1000) + 's)')), FETCH_TIMEOUT_MS);
+                });
+
+                const fetchPromise = fetch(bustUrl, { method: 'GET', cache: 'no-store' })
+                    .then(async (response) => {
+                        if (!response.ok) throw new Error('HTTP ' + response.status);
+                        const text = await response.text();
+                        const match = text.match(/window\.BANNER_DATA\s*=\s*({[\s\S]*?});/);
+                        if (!match) throw new Error('ساختار نامعتبر در پاسخ');
+                        return JSON.parse(match[1]);
                     });
 
-                    if (!response.ok) {
-                        // اگر خطا داشت، فقط یه پیام اطلاع‌رسانی نشون بده
-                        testResult.innerHTML = 'ℹ️ امکان مقایسه با گیت‌هاب وجود ندارد (محدودیت CORS)';
-                        testResult.className = 'test-result info';
-                        return;
-                    }
-
-                    const rawText = await response.text();
-                    const match = rawText.match(/window\.BANNER_DATA\s*=\s*({[\s\S]*?});/);
-                    if (!match) throw new Error('ساختار نامعتبر');
-                    const rawData = JSON.parse(match[1]);
-
-                    const currentData = bannerData || {};
-                    const isMatch = JSON.stringify(currentData) === JSON.stringify(rawData);
-
-                    if (isMatch) {
-                        testResult.innerHTML = '✅ فایل با گیت‌هاب هم‌خوانی دارد';
-                        testResult.className = 'test-result pass';
-                    } else {
-                        testResult.innerHTML = '⚠️ فایل با گیت‌هاب هم‌خوانی ندارد!<br><span style="font-size:11px;color:#8d8a9a;">نسخه محلی با نسخه گیت‌هاب متفاوت است.</span>';
-                        testResult.className = 'test-result fail';
-                    }
-
-                    const versionMatch = rawText.match(/FILE_VERSION\s*=\s*['"]([^'"]+)['"]/);
-                    if (versionMatch) {
-                        testResult.innerHTML += `<br><span style="font-size:10px;color:#5f5d6b;">نسخه گیت‌هاب: ${versionMatch[1]}</span>`;
-                    }
-
-                } catch (e) {
-                    // در صورت هر گونه خطا (از جمله CORS)، فقط پیام اطلاع‌رسانی نشون بده
-                    console.warn('مقایسه با گیت‌هاب انجام نشد:', e.message);
-                    testResult.innerHTML = 'ℹ️ امکان مقایسه با گیت‌هاب وجود ندارد (مشکل شبکه یا CORS)';
-                    testResult.className = 'test-result info';
-                }
-            }
-
-            // ============================================================
-            //  FETCH — بارگذاری داینامیک فایل JS با نسخه‌گذاری
-            // ============================================================
-            function loadScript(url) {
-                return new Promise((resolve, reject) => {
-                    const oldScript = document.querySelector('script[data-banner-script]');
-                    if (oldScript) oldScript.remove();
-
-                    const script = document.createElement('script');
-                    script.src = url;
-                    script.setAttribute('data-banner-script', 'true');
-                    script.crossOrigin = 'anonymous';
-                    script.onload = () => {
-                        if (window.BANNER_DATA) {
-                            resolve(window.BANNER_DATA);
-                        } else {
-                            reject(new Error('BANNER_DATA not found'));
-                        }
-                    };
-                    script.onerror = () => reject(new Error('Script load error'));
-                    document.head.appendChild(script);
-                });
+                return Promise.race([fetchPromise, timeoutPromise]);
             }
 
             async function fetchBanner(lang) {
                 if (isFetching) return;
                 isFetching = true;
 
-                // نمایش لودینگ
                 titleEl.textContent = '⏳ در حال بارگذاری…';
-                subEl.textContent = 'دریافت از GitHub (نسخه ' + FILE_VERSION + ')';
-                htmlContainer.classList.add('hidden');
-                loaderWrap.classList.remove('hidden');
-                loaderWrap.innerHTML = `
-                    <div class="loader"></div>
-                    <span style="color:#8d8a9a;font-size:13px;">دریافت از GitHub…</span>
-                `;
-                actionBtn.textContent = '…';
-                statusMsg.textContent = 'در حال دریافت نسخه ' + FILE_VERSION + '…';
+                subEl.textContent = 'دریافت از GitHub';
+                if (!bannerData) {
+                    htmlContainer.classList.add('hidden');
+                    loaderWrap.classList.remove('hidden');
+                    loaderWrap.innerHTML = `
+                        <div class="loader"></div>
+                        <span style="color:#8d8a9a;font-size:13px;">دریافت از GitHub…</span>
+                    `;
+                }
+                statusMsg.textContent = 'در حال دریافت…';
                 statusMsg.className = 'status';
 
-                try {
-                    const json = await loadScript(JS_URL);
-                    localStorage.setItem('banner-cache', JSON.stringify(json));
-                    localStorage.setItem('banner-version', FILE_VERSION);
+                let json = null;
+                let lastError = null;
+
+                for (let i = 0; i < SOURCES.length; i++) {
+                    try {
+                        json = await tryFetch(SOURCES[i]);
+                        break;
+                    } catch (err) {
+                        lastError = err;
+                        console.warn('منبع ناموفق:', SOURCES[i], err.message);
+                        continue;
+                    }
+                }
+
+                if (json) {
+                    try {
+                        localStorage.setItem(CACHE_KEY, JSON.stringify(json));
+                        localStorage.setItem(CACHE_TIME_KEY, String(Date.now()));
+                    } catch (_) {}
+
                     bannerData = json;
                     const data = json[lang] || json.en;
                     render(lang, data);
-                    updateLangButtons(lang);
-                    statusMsg.textContent = '✅ دریافت موفق · نسخه ' + FILE_VERSION;
+
+                    statusMsg.textContent = '✅ بارگذاری موفق';
                     statusMsg.className = 'status success';
-
-                    // بعد از دریافت، تست مقایسه انجام بده (خطاهای آن مدیریت می‌شود)
-                    await testAgainstGitHub();
-
-                } catch (e) {
-                    console.warn('خطا در بارگذاری JS:', e);
+                } else {
+                    console.error('❌ همه منابع شکست خوردند:', lastError);
                     try {
-                        const cachedVersion = localStorage.getItem('banner-version');
-                        const cached = localStorage.getItem('banner-cache');
-                        if (cached && cachedVersion === FILE_VERSION) {
+                        const cached = localStorage.getItem(CACHE_KEY);
+                        if (cached) {
                             const cachedJson = JSON.parse(cached);
                             bannerData = cachedJson;
                             const data = cachedJson[lang] || cachedJson.en;
                             if (data) {
                                 render(lang, data);
-                                updateLangButtons(lang);
-                                statusMsg.textContent = '⚠️ استفاده از کش (نسخه ' + FILE_VERSION + ')';
+                                const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
+                                const ago = cacheTime ? Math.round((Date.now() - Number(cacheTime)) / 60000) : null;
+                                statusMsg.textContent = ago !== null
+                                    ? `⚠️ عدم اتصال — نمایش کش (${ago} دقیقه پیش)`
+                                    : '⚠️ عدم اتصال — نمایش کش محلی';
                                 statusMsg.className = 'status info';
-                                await testAgainstGitHub();
                                 isFetching = false;
                                 return;
                             }
                         }
                     } catch (_) {}
                     render(lang, null);
-                    statusMsg.textContent = '❌ خطا در بارگذاری فایل JS';
+                    statusMsg.textContent = '❌ خطا: ' + (lastError ? lastError.message : 'اتصال برقرار نشد');
                     statusMsg.className = 'status error';
-                    testResult.innerHTML = '❌ خطا: ' + e.message;
-                    testResult.className = 'test-result fail';
                 }
 
                 isFetching = false;
             }
 
-            // ============================================================
-            //  LANGUAGE SWITCH
-            // ============================================================
-            function updateLangButtons(lang) {
-                langFa.classList.toggle('active', lang === 'fa');
-                langEn.classList.toggle('active', lang === 'en');
-                currentLang = lang;
-                document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
-                document.documentElement.lang = lang;
-                if (bannerData) {
-                    const data = bannerData[lang] || bannerData.en;
-                    render(lang, data);
-                }
-            }
-
-            langFa.addEventListener('click', () => {
-                if (currentLang === 'fa') return;
-                currentLang = 'fa';
-                updateLangButtons('fa');
-                if (bannerData) {
-                    const data = bannerData.fa || bannerData.en;
-                    render('fa', data);
-                } else {
-                    fetchBanner('fa');
-                }
-            });
-
-            langEn.addEventListener('click', () => {
-                if (currentLang === 'en') return;
-                currentLang = 'en';
-                updateLangButtons('en');
-                if (bannerData) {
-                    const data = bannerData.en || bannerData.fa;
-                    render('en', data);
-                } else {
-                    fetchBanner('en');
-                }
-            });
-
-            // ============================================================
-            //  CLOSE BUTTON
-            // ============================================================
-            closeBtn.addEventListener('click', function(e) {
+            closeBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 window.location.href = 'index2.html';
             });
 
-            // ============================================================
-            //  FORCE REFRESH
-            // ============================================================
-            versionBadge.addEventListener('click', function() {
-                if (confirm('بارگذاری مجدد با آخرین نسخه از GitHub؟')) {
-                    localStorage.removeItem('banner-cache');
-                    localStorage.removeItem('banner-version');
-                    testResult.innerHTML = '⏳ در حال بروزرسانی…';
-                    testResult.className = 'test-result';
-                    fetchBanner(currentLang);
-                }
+            window.addEventListener('online', () => {
+                if (!bannerView.classList.contains('hidden')) fetchBanner(currentLang);
             });
 
             // ============================================================
-            //  INIT
+            //  INIT — اگه قبلاً انتخاب شده بود، مستقیم بنر رو نشون بده
+            //  و گرنه صفحه‌ی setup رو نشون بده
             // ============================================================
-            (async function init() {
-                // بررسی کش با نسخه
+            (function init() {
                 try {
-                    const cachedVersion = localStorage.getItem('banner-version');
-                    const cached = localStorage.getItem('banner-cache');
-                    if (cached && cachedVersion === FILE_VERSION) {
-                        const json = JSON.parse(cached);
-                        bannerData = json;
-                        const data = json[currentLang] || json.en;
-                        render(currentLang, data);
-                        statusMsg.textContent = '📦 از کش · نسخه ' + FILE_VERSION;
-                        statusMsg.className = 'status info';
+                    const saved = localStorage.getItem(ONBOARDING_KEY);
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        if (data && data.done) {
+                            showBanner(data.lang || 'fa', data.theme || 'dark');
+                            return;
+                        }
                     }
                 } catch (_) {}
 
-                // دریافت از شبکه
-                await fetchBanner(currentLang);
+                // هنوز انتخاب نکرده: صفحه‌ی setup با پیش‌فرض فارسی/تاریک نمایش داده می‌شه
+                applySetupUiLang('fa');
+                applyDocLangDir('fa');
             })();
 
         })();
