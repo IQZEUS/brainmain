@@ -10,7 +10,7 @@
   },
   "fa": {
     "title": "📢 نسخه جدید منتشر شد",
-    "sub": "مغز نسخه ۲ منتشر شد!",
+    "sub": "مغز نسخه 2۲ منتشر شد!",
     "html": "<div style='padding:16px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:12px;text-align:center;'><img src='https://via.placeholder.com/400x120/1a1a2e/d6a35c?text=مغز+دوم+v2' style='max-width:100%;border-radius:8px;'/><p style='margin-top:12px;color:#eae7de;font-size:15px;'>✨ امکانات جدید: گراف هوشمندتر، پشتیبانی آفلاین و موارد دیگر!</p></div>",
     "button": {
       "label": "📥 دانلود نسخه جدید",
