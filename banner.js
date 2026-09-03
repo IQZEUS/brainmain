@@ -1,57 +1,20 @@
-// ============================================================
-//  بارگذاری فایل JS با اطمینان از دریافت نسخه جدید
-// ============================================================
-const FILE_VERSION = '2.0.4'; // هر بار تغییر بده
-const JS_URL = `https://cdn.jsdelivr.net/gh/IQZEUS/brainmain@main/banner.js?v=${FILE_VERSION}`;
-
-function loadBannerScript() {
-    return new Promise((resolve) => {
-        const oldScript = document.querySelector('script[data-banner]');
-        if (oldScript) oldScript.remove();
-
-        const script = document.createElement('script');
-        script.src = JS_URL;
-        script.dataset.banner = 'true';
-        script.crossOrigin = 'anonymous';
-        script.onload = () => {
-            resolve(window.BANNER_DATA || null);
-        };
-        script.onerror = () => {
-            // اگر خطا داشت، از کش استفاده کن
-            const cached = localStorage.getItem('banner-cache');
-            if (cached) {
-                try { resolve(JSON.parse(cached)); } 
-                catch { resolve(null); }
-            } else {
-                resolve(null);
-            }
-        };
-        document.head.appendChild(script);
-
-        // تایم‌اوت ۳ ثانیه برای جلوگیری از هنگ
-        setTimeout(() => {
-            if (!window.BANNER_DATA) {
-                const cached = localStorage.getItem('banner-cache');
-                if (cached) {
-                    try { resolve(JSON.parse(cached)); } 
-                    catch { resolve(null); }
-                } else {
-                    resolve(null);
-                }
-            }
-        }, 3000);
-    });
-}
-
-// اجرا
-(async function init() {
-    const data = await loadBannerScript();
-    if (data) {
-        localStorage.setItem('banner-cache', JSON.stringify(data));
-        // رندر کن
-        renderBanner(data);
-    } else {
-        // fallback نهایی
-        renderBanner(fallbackData);
+window.BANNER_DATA = {
+  "en": {
+    "title": "📢 New Version Available",
+    "sub": "Second Brain v2.0 is here!",
+    "html": "<div style='padding:16px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:12px;text-align:center;'><p style='margin-top:12px;color:#eae7de;font-size:15px;'>✨ New features: smarter graph, offline support, and more!</p></div>",
+    "button": {
+      "label": "📥 Download Now",
+      "link": "https://github.com/IQZEUS/brainmain"
     }
-})();
+  },
+  "fa": {
+    "title": "📢 نسخه جدید منتشر شد",
+    "sub": "مغز نسخه ۲ منتشر شد!",
+    "html": "<div style='padding:16px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:12px;text-align:center;'><p style='margin-top:12px;color:#eae7de;font-size:15px;'>✨ امکانات جدید: گراف هوشمندتر، پشتیبانی آفلاین و موارد دیگر!</p></div>",
+    "button": {
+      "label": "📥 دانلود نسخه جدید",
+      "link": "https://github.com/IQZEUS/brainmain"
+    }
+  }
+};
