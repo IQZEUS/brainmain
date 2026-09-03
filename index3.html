@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Second Brain · مغز دوم</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js">
+    </script>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html,
+        body {
+            height: 100%;
+            background: #0e0e14;
+            color: #eae7de;
+            font-family: 'Segoe UI', 'Vazirmatn', sans-serif;
+            font-size: 15px;
+            overflow: hidden;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== LOADING SCREEN ===== */
+        #loadingScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #0e0e14;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            transition: opacity .55s ease, visibility .55s ease;
+        }
+        #loadingScreen.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .load-brand {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            font-size: 20px;
+            letter-spacing: .5px;
+            color: #eae7de;
+        }
+        .load-msg {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: #5f5d6b;
+            min-height: 16px;
+        }
+        .ln-node {
+            animation: nodePulse 1.8s ease-in-out infinite;
+        }
+        .ln-edge {
+            stroke-dasharray: 60;
+            stroke-dashoffset: 60;
+            animation: drawEdge 1.6s ease forwards infinite;
+        }
+        @keyframes nodePulse {
+            0%,
+            100% {
+                opacity: .45;
+                r: 3;
+            }
+            50% {
+                opacity: 1;
+                r: 5;
+            }
+        }
+        @keyframes drawEdge {
+            0% {
+                stroke-dashoffset: 60;
+                opacity: 0;
+            }
+            40% {
+                opacity: 1;
+            }
+            100% {
+                stroke-dashoffset: 0;
+                opacity: .15;
+            }
+        }
+
+        /* ===== OVERLAY PAGES ===== */
+        .overlay-page {
+            position: fixed;
+            inset: 0;
+            z-index: 8000;
+            background: rgba(14, 14, 20, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: opacity .4s ease, transform .4s ease;
+            opacity: 0;
+            transform: scale(0.97);
+            pointer-events: none;
+        }
+        .overlay-page.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+        .overlay-card {
+            background: #1a1a24;
+            border: 1px solid #323242;
+            border-radius: 20px;
+            padding: 32px 36px;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .overlay-card h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: #eae7de;
+            text-align: center;
+        }
+        .overlay-card p {
+            color: #8d8a9a;
+            font-size: 14px;
+            line-height: 1.8;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* ===== SETTINGS PAGE ===== */
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #2a2a38;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .settings-row .label {
+            font-weight: 500;
+            color: #c9c6bd;
+            font-size: 14px;
+        }
+        .settings-row .options {
+            display: flex;
+            gap: 6px;
+            background: #1e1e28;
+            border-radius: 30px;
+            padding: 3px;
+            border: 1px solid #323242;
+        }
+        .settings-row .options button {
+            background: transparent;
+            border: none;
+            color: #8d8a9a;
+            font-size: 13px;
+            padding: 6px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: .15s;
+        }
+        .settings-row .options button.active {
+            background: #d6a35c;
+            color: #0e0e14;
+            font-weight: 600;
+            box-shadow: 0 2px 12px rgba(214, 163, 92, 0.3);
+        }
+        .settings-row .options button:hover:not(.active) {
+            color: #eae7de;
+        }
+        .settings-submit {
+            width: 100%;
+            margin-top: 16px;
+            background: #d6a35c;
+            color: #0e0e14;
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: .15s;
+        }
+        .settings-submit:hover {
+            background: #e2b06f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(214, 163, 92, 0.3);
+        }
+
+        /* ===== BANNER / AD PAGE ===== */
+        .banner-area {
+            margin: 12px 0 18px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #1e1e28;
+            border: 1px solid #323242;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+            text-align: center;
+            transition: .2s;
+            position: relative;
+        }
+        .banner-area img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .banner-area .placeholder-banner {
+            color: #5f5d6b;
+            font-size: 13px;
+        }
+        .banner-area .banner-text {
+            color: #c9c6bd;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-top: 6px;
+        }
+        .banner-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            justify-content: center;
+        }
+        .banner-actions .btn {
+            padding: 10px 28px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            transition: .15s;
+        }
+        .banner-actions .btn-primary {
+            background: #d6a35c;
+            color: #0e0e14;
+        }
+        .banner-actions .btn-primary:hover {
+            background: #e2b06f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(214, 163, 92, 0.3);
+        }
+
+        .close-banner {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            color: #5f5d6b;
+            font-size: 24px;
+            cursor: pointer;
+            transition: .15s;
+            line-height: 1;
+            z-index: 10;
+            text-decoration: none;
+        }
+        .close-banner:hover {
+            color: #cf6f6f;
+            transform: rotate(90deg);
+        }
+        [dir="rtl"] .close-banner {
+            right: auto;
+            left: 16px;
+        }
+
+        /* ===== BANNER LOADING SPINNER ===== */
+        .banner-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .banner-loader .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(214, 163, 92, 0.15);
+            border-top-color: #d6a35c;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .banner-loader .spinner-text {
+            color: #8d8a9a;
+            font-size: 13px;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== MAIN APP ===== */
+        #appRoot {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            min-height: 0;
+        }
+        #appRoot.visible {
+            display: flex;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .overlay-card {
+                padding: 24px 18px;
+                margin: 10px;
+            }
+            .settings-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .settings-row .options {
+                align-self: stretch;
+                justify-content: center;
+            }
+            .banner-actions .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            .close-banner {
+                top: 12px;
+                right: 12px;
+            }
+            [dir="rtl"] .close-banner {
+                right: auto;
+                left: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== LOADING SCREEN ===== -->
+    <div id="loadingScreen">
+        <svg viewBox="0 0 220 160" width="180" height="130">
+            <g id="loadLines" fill="none" stroke="#3a3a4d" stroke-width="1.2"></g>
+            <g id="loadNodes"></g>
+        </svg>
+        <div class="load-brand">Second Brain</div>
+        <div class="load-msg" id="loadMsg">Waking up…</div>
+    </div>
+
+    <!-- ===== OVERLAY: تنظیمات اولیه (یکبار) ===== -->
+    <div class="overlay-page" id="settingsPage">
+        <div class="overlay-card">
+            <h2 id="settingsTitle">⚙️ Initial Setup</h2>
+            <p id="settingsDesc">Choose your preferences. This page appears only once.</p>
+
+            <div class="settings-row">
+                <span class="label" id="themeLabel">🌓 Theme</span>
+                <div class="options" id="themeOptions">
+                    <button class="active" data-value="dark">Dark</button>
+                    <button data-value="light">Light</button>
+                </div>
+            </div>
+
+            <div class="settings-row">
+                <span class="label" id="langLabel">🌐 Language</span>
+                <div class="options" id="langOptions">
+                    <button class="active" data-value="en">English</button>
+                    <button data-value="fa">فارسی</button>
+                </div>
+            </div>
+
+            <button class="settings-submit" id="settingsSubmit">✅ Continue</button>
+        </div>
+    </div>
+
+    <!-- ===== OVERLAY: صفحه تبلیغات (از گیت) ===== -->
+    <div class="overlay-page" id="bannerPage">
+        <div class="overlay-card">
+            <a class="close-banner" id="closeBannerBtn" href="https://github.com/IQZEUS/brainmain/tree/main" target="_blank">✕</a>
+            <h2 id="bannerTitle">📢 Announcement</h2>
+            <p id="bannerSub" style="font-size:13px;color:#8d8a9a;">Latest news & updates</p>
+
+            <div class="banner-area" id="bannerArea">
+                <div id="bannerLoader" class="banner-loader">
+                    <div class="spinner"></div>
+                    <div class="spinner-text">Loading content…</div>
+                </div>
+                <div id="bannerContent" style="display:none;"></div>
+            </div>
+
+            <div class="banner-actions">
+                <button class="btn btn-primary" id="bannerActionBtn">📖 View</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== برنامه اصلی ===== -->
+    <div id="appRoot">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#5f5d6b;font-size:18px;flex-direction:column;gap:12px;">
+            <div style="font-size:48px;">🧠</div>
+            <div>Second Brain — Ready</div>
+            <div style="font-size:13px;color:#3a3a4a;">(Main app loads here)</div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ================================================================
+            //  1.  LOADING SCREEN
+            // ================================================================
+            function buildLoadingGraphic() {
+                const pts = [
+                    [110, 30],
+                    [45, 70],
+                    [175, 70],
+                    [30, 125],
+                    [110, 110],
+                    [190, 125],
+                    [110, 150]
+                ];
+                const edges = [
+                    [0, 1],
+                    [0, 2],
+                    [1, 3],
+                    [1, 4],
+                    [2, 4],
+                    [2, 5],
+                    [4, 6],
+                    [4, 3],
+                    [4, 5]
+                ];
+                const colors = ['#d6a35c', '#6fb3a0', '#9382d6', '#6fb3a0', '#d6a35c', '#9382d6', '#6fb3a0'];
+                const lg = document.getElementById('loadLines');
+                const ng = document.getElementById('loadNodes');
+                edges.forEach(([a, b], i) => {
+                    const [x1, y1] = pts[a],
+                        [x2, y2] = pts[b];
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', x1);
+                    line.setAttribute('y1', y1);
+                    line.setAttribute('x2', x2);
+                    line.setAttribute('y2', y2);
+                    line.setAttribute('class', 'ln-edge');
+                    line.style.animationDelay = (i * 0.12) + 's';
+                    lg.appendChild(line);
+                });
+                pts.forEach((p, i) => {
+                    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    c.setAttribute('cx', p[0]);
+                    c.setAttribute('cy', p[1]);
+                    c.setAttribute('r', 4);
+                    c.setAttribute('fill', colors[i % colors.length]);
+                    c.setAttribute('class', 'ln-node');
+                    c.style.animationDelay = (i * 0.15) + 's';
+                    ng.appendChild(c);
+                });
+            }
+            buildLoadingGraphic();
+
+            const loadMsgEl = document.getElementById('loadMsg');
+            const loadingMessages = {
+                en: ['Waking up Second Brain…', 'Loading notes…', 'Building connections…', 'Preparing graph…',
+                    'Final touches…'
+                ],
+                fa: ['در حال بیدار شدن مغز دوم…', 'بارگذاری یادداشت‌ها…', 'ساخت ارتباط بین ایده‌ها…', 'آماده‌سازی گراف دانش…',
+                    'چیدن آخرین تکه‌ها…'
+                ]
+            };
+            let msgIdx = 0;
+            let currentLang = 'en';
+
+            function getLoadMessages(lang) {
+                return loadingMessages[lang] || loadingMessages.en;
+            }
+
+            function updateLoadingMessage(lang) {
+                const msgs = getLoadMessages(lang);
+                loadMsgEl.textContent = msgs[msgIdx % msgs.length];
+            }
+
+            const msgInterval = setInterval(() => {
+                const msgs = getLoadMessages(currentLang);
+                msgIdx = (msgIdx + 1) % msgs.length;
+                loadMsgEl.style.opacity = 0;
+                setTimeout(() => {
+                    loadMsgEl.textContent = msgs[msgIdx];
+                    loadMsgEl.style.opacity = 1;
+                }, 200);
+            }, 750);
+
+            function hideLoading() {
+                clearInterval(msgInterval);
+                document.getElementById('loadingScreen').classList.add('hide');
+            }
+
+            // ================================================================
+            //  2.  SETTINGS (one-time)
+            // ================================================================
+            const SETTINGS_KEY = 'second-brain-settings-v1';
+
+            function getStoredSettings() {
+                try {
+                    const raw = localStorage.getItem(SETTINGS_KEY);
+                    if (raw) return JSON.parse(raw);
+                } catch (_) {}
+                return null;
+            }
+
+            function saveSettings(settings) {
+                localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+            }
+
+            const settingsPage = document.getElementById('settingsPage');
+            const themeBtns = document.querySelectorAll('#themeOptions button');
+            const langBtns = document.querySelectorAll('#langOptions button');
+            const settingsSubmit = document.getElementById('settingsSubmit');
+
+            const settingsI18n = {
+                en: {
+                    title: '⚙️ Initial Setup',
+                    desc: 'Choose your preferences. This page appears only once.',
+                    theme: '🌓 Theme',
+                    lang: '🌐 Language',
+                    continue: '✅ Continue'
+                },
+                fa: {
+                    title: '⚙️ تنظیمات اولیه',
+                    desc: 'تنظیمات دلخواه خود را انتخاب کنید. این صفحه فقط یکبار نمایش داده می‌شود.',
+                    theme: '🌓 تم',
+                    lang: '🌐 زبان',
+                    continue: '✅ ادامه'
+                }
+            };
+
+            function updateSettingsUI(lang) {
+                const t = settingsI18n[lang] || settingsI18n.en;
+                document.getElementById('settingsTitle').textContent = t.title;
+                document.getElementById('settingsDesc').textContent = t.desc;
+                document.getElementById('themeLabel').textContent = t.theme;
+                document.getElementById('langLabel').textContent = t.lang;
+                settingsSubmit.textContent = t.continue;
+                currentLang = lang;
+                const msgs = getLoadMessages(lang);
+                loadMsgEl.textContent = msgs[0];
+            }
+
+            let selectedTheme = 'dark';
+            let selectedLang = 'en';
+
+            // default: English, Dark
+            langBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === 'en');
+            });
+            themeBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === 'dark');
+            });
+
+            themeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    themeBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedTheme = btn.dataset.value;
+                });
+            });
+            langBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    langBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedLang = btn.dataset.value;
+                    updateSettingsUI(selectedLang);
+                    document.documentElement.dir = selectedLang === 'fa' ? 'rtl' : 'ltr';
+                    document.documentElement.lang = selectedLang;
+                });
+            });
+
+            settingsSubmit.addEventListener('click', () => {
+                const settings = {
+                    theme: selectedTheme,
+                    lang: selectedLang,
+                    configured: true,
+                    timestamp: Date.now()
+                };
+                saveSettings(settings);
+                applyTheme(selectedTheme);
+                applyLang(selectedLang);
+                settingsPage.classList.remove('show');
+                // after settings, show banner
+                showBannerPage(selectedLang);
+            });
+
+            function applyTheme(theme) {
+                if (theme === 'light') {
+                    document.documentElement.style.setProperty('--bg', '#f5f3f0');
+                    document.documentElement.style.setProperty('--surface', '#efede8');
+                    document.documentElement.style.setProperty('--text', '#1e1e24');
+                    document.documentElement.style.setProperty('--text-dim', '#5a5a6a');
+                } else {
+                    document.documentElement.style.setProperty('--bg', '#0e0e14');
+                    document.documentElement.style.setProperty('--surface', '#16161e');
+                    document.documentElement.style.setProperty('--text', '#eae7de');
+                    document.documentElement.style.setProperty('--text-dim', '#8d8a9a');
+                }
+            }
+
+            function applyLang(lang) {
+                document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+                document.documentElement.lang = lang;
+                currentLang = lang;
+                updateSettingsUI(lang);
+            }
+
+            // ================================================================
+            //  3.  BANNER — always fetch fresh, ignore cache
+            // ================================================================
+            const bannerPage = document.getElementById('bannerPage');
+            const bannerContent = document.getElementById('bannerContent');
+            const bannerLoader = document.getElementById('bannerLoader');
+            const bannerTitle = document.getElementById('bannerTitle');
+            const bannerSub = document.getElementById('bannerSub');
+            const bannerActionBtn = document.getElementById('bannerActionBtn');
+
+            const BANNER_URL = 'https://raw.githubusercontent.com/IQZEUS/brainmain/refs/heads/main/banner.json';
+
+            const defaultBanner = {
+                en: {
+                    title: '📢 Announcement',
+                    sub: 'Latest news & updates',
+                    html: '<div class="placeholder-banner">No content from GitHub yet.<br>Check your BANNER_URL.</div>',
+                    button: { label: '📖 View', link: 'https://github.com/IQZEUS/brainmain' }
+                },
+                fa: {
+                    title: '📢 اطلاع‌رسانی',
+                    sub: 'آخرین اخبار و بروزرسانی‌ها',
+                    html: '<div class="placeholder-banner">محتوایی از گیت دریافت نشد.<br>آدرس BANNER_URL را بررسی کنید.</div>',
+                    button: { label: '📖 مشاهده', link: 'https://github.com/IQZEUS/brainmain' }
+                }
+            };
+
+            let isBannerLoading = false;
+
+            function renderBanner(lang, data) {
+                if (!data) {
+                    data = defaultBanner[lang] || defaultBanner.en;
+                }
+                // update all elements from JSON data
+                bannerTitle.textContent = data.title || '📢 Announcement';
+                bannerSub.textContent = data.sub || 'Latest news & updates';
+                bannerContent.innerHTML = data.html || '<div class="placeholder-banner">No content</div>';
+                const btn = data.button || { label: '📖 View', link: '#' };
+                bannerActionBtn.textContent = btn.label || '📖 View';
+                bannerActionBtn.onclick = () => {
+                    if (btn.link && btn.link !== '#') window.open(btn.link, '_blank');
+                    else alert('No link configured.');
+                };
+                // show content, hide loader
+                bannerLoader.style.display = 'none';
+                bannerContent.style.display = 'block';
+            }
+
+            async function fetchBanner(lang) {
+                if (isBannerLoading) return;
+                isBannerLoading = true;
+
+                // show loader, hide content
+                bannerLoader.style.display = 'flex';
+                bannerContent.style.display = 'none';
+
+                try {
+                    // Always fetch fresh with cache-busting timestamp
+                    const cacheBuster = '?t=' + Date.now();
+                    const response = await fetch(BANNER_URL + cacheBuster, {
+                        method: 'GET',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    });
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    const json = await response.json();
+                    // store in cache for offline fallback (but we don't rely on it)
+                    localStorage.setItem('banner-cache', JSON.stringify(json));
+                    const data = json[lang] || json.en;
+                    if (data) {
+                        renderBanner(lang, data);
+                    } else {
+                        renderBanner(lang, defaultBanner[lang] || defaultBanner.en);
+                    }
+                } catch (e) {
+                    console.warn('Failed to fetch banner from GitHub:', e);
+                    // fallback to cache if available, else default
+                    try {
+                        const cached = localStorage.getItem('banner-cache');
+                        if (cached) {
+                            const parsed = JSON.parse(cached);
+                            const data = parsed[lang] || parsed.en;
+                            if (data) {
+                                renderBanner(lang, data);
+                                isBannerLoading = false;
+                                return;
+                            }
+                        }
+                    } catch (_) {}
+                    renderBanner(lang, defaultBanner[lang] || defaultBanner.en);
+                }
+                isBannerLoading = false;
+            }
+
+            function showBannerPage(lang) {
+                bannerPage.classList.add('show');
+                // start fetching immediately
+                fetchBanner(lang);
+            }
+
+            // ================================================================
+            //  4.  INIT
+            // ================================================================
+            (async function init() {
+                // show loading screen for at least 1.5s for smooth transition
+                await new Promise(r => setTimeout(r, 1500));
+                hideLoading();
+
+                const settings = getStoredSettings();
+                if (!settings || !settings.configured) {
+                    // first time → show settings
+                    updateSettingsUI('en');
+                    settingsPage.classList.add('show');
+                } else {
+                    // apply saved settings
+                    applyTheme(settings.theme || 'dark');
+                    applyLang(settings.lang || 'en');
+                    // show banner
+                    showBannerPage(settings.lang || 'en');
+                }
+            })();
+
+            // ================================================================
+            //  Reset for testing:
+            //  localStorage.removeItem('second-brain-settings-v1');
+            //  localStorage.removeItem('banner-cache');
+            //  location.reload();
+            // ================================================================
+        })();
+    </script>
+</body>
+</html>
