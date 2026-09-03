@@ -8,6 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Second Brain · مغز دوم</title>
     <style>
+        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -27,6 +28,7 @@
             flex-direction: column;
         }
 
+        /* ===== LOADING ===== */
         #loadingScreen {
             position: fixed;
             inset: 0;
@@ -68,6 +70,7 @@
             }
         }
 
+        /* ===== OVERLAY ===== */
         .overlay-page {
             position: fixed;
             inset: 0;
@@ -114,6 +117,7 @@
             margin-bottom: 20px;
         }
 
+        /* ===== SETTINGS ===== */
         .settings-row {
             display: flex;
             justify-content: space-between;
@@ -176,6 +180,7 @@
             box-shadow: 0 6px 20px rgba(214, 163, 92, 0.3);
         }
 
+        /* ===== BANNER ===== */
         .banner-area {
             margin: 12px 0 18px;
             border-radius: 16px;
@@ -330,14 +335,14 @@
 </head>
 <body>
 
-    <!-- LOADING -->
+    <!-- ===== LOADING ===== -->
     <div id="loadingScreen">
         <div class="spinner"></div>
         <div class="load-brand">Second Brain</div>
         <div class="load-msg" id="loadMsg">Waking up…</div>
     </div>
 
-    <!-- SETTINGS (first time only) -->
+    <!-- ===== SETTINGS (first time only) ===== -->
     <div class="overlay-page" id="settingsPage">
         <div class="overlay-card">
             <h2 id="settingsTitle">⚙️ Initial Setup</h2>
@@ -360,7 +365,7 @@
         </div>
     </div>
 
-    <!-- BANNER -->
+    <!-- ===== BANNER ===== -->
     <div class="overlay-page" id="bannerPage">
         <div class="overlay-card">
             <a class="close-banner" id="closeBannerBtn" href="index2.html">✕</a>
@@ -383,7 +388,7 @@
         </div>
     </div>
 
-    <!-- MAIN APP placeholder -->
+    <!-- ===== MAIN APP placeholder ===== -->
     <div id="appRoot">
         <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#5f5d6b;font-size:18px;flex-direction:column;gap:12px;">
             <div style="font-size:48px;">🧠</div>
@@ -443,11 +448,9 @@
             }
 
             // ============================================================
-            // BANNER FETCH – primary (raw GitHub) + fallback (jsDelivr)
+            // BANNER FETCH – دریافت مستقیم از GitHub
             // ============================================================
-            const BANNER_URL_RAW =
-                'https://raw.githubusercontent.com/IQZEUS/brainmain/refs/heads/main/banner.json';
-            const BANNER_URL_CDN = 'https://cdn.jsdelivr.net/gh/IQZEUS/brainmain@main/banner.json';
+            const BANNER_RAW = 'https://raw.githubusercontent.com/IQZEUS/brainmain/refs/heads/main/banner.json';
 
             const bannerPage = document.getElementById('bannerPage');
             const bannerTitle = document.getElementById('bannerTitle');
@@ -457,7 +460,6 @@
             const bannerActionBtn = document.getElementById('bannerActionBtn');
 
             function renderBanner(lang, data) {
-                // If data is null or undefined → show error with manual link
                 if (!data) {
                     bannerTitle.textContent = '⚠️ No Data';
                     bannerSub.textContent = 'Failed to load from GitHub';
@@ -466,7 +468,7 @@
                             No content received from GitHub.<br>
                             <span style="font-size:12px;color:#5f5d6b;">
                                 Try opening the JSON file directly:
-                                <a href="${BANNER_URL_RAW}" target="_blank" class="manual-link">${BANNER_URL_RAW}</a>
+                                <a href="${BANNER_RAW}" target="_blank" class="manual-link">${BANNER_RAW}</a>
                                 <br>Then click Retry below.
                             </span>
                         </div>
@@ -478,7 +480,7 @@
                     return;
                 }
 
-                // ✅ All data from JSON
+                // All good – render
                 bannerTitle.textContent = data.title || '📢 Announcement';
                 bannerSub.textContent = data.sub || 'Latest news & updates';
                 bannerContent.innerHTML = data.html || '<div class="placeholder-banner">No content</div>';
@@ -504,12 +506,11 @@
                 bannerContent.style.display = 'none';
 
                 const loaderText = bannerLoader.querySelector('div:last-child');
-                if (loaderText) loaderText.textContent = 'Fetching from GitHub… ' + new Date().toLocaleTimeString();
+                if (loaderText) loaderText.textContent = 'دریافت از GitHub… ' + new Date().toLocaleTimeString();
 
-                // Helper function to try a URL
-                async function tryFetch(url) {
-                    const cacheBuster = '?t=' + Date.now() + '&r=' + Math.random().toString(36).substring(2, 8);
-                    const response = await fetch(url + cacheBuster, {
+                try {
+                    // دریافت مستقیم با کش‌شکنی
+                    const response = await fetch(BANNER_RAW + '?t=' + Date.now(), {
                         method: 'GET',
                         cache: 'reload',
                         headers: {
@@ -518,53 +519,35 @@
                             'Expires': '0'
                         }
                     });
+
                     if (!response.ok) throw new Error('HTTP ' + response.status);
-                    return await response.json();
-                }
+                    
+                    const text = await response.text();
+                    const json = JSON.parse(text);
 
-                let json = null;
-                let usedUrl = '';
-
-                try {
-                    // 1st attempt: raw GitHub
-                    json = await tryFetch(BANNER_URL_RAW);
-                    usedUrl = BANNER_URL_RAW;
-                } catch (e1) {
-                    console.warn('Raw GitHub failed, trying jsDelivr…', e1);
-                    try {
-                        // 2nd attempt: jsDelivr CDN (more reliable in some networks)
-                        json = await tryFetch(BANNER_URL_CDN);
-                        usedUrl = BANNER_URL_CDN;
-                    } catch (e2) {
-                        console.error('Both URLs failed.', e2);
-                        // Fallback to cache if available
-                        try {
-                            const cached = localStorage.getItem('banner-cache');
-                            if (cached) {
-                                const parsed = JSON.parse(cached);
-                                const data = parsed[lang] || parsed.en;
-                                if (data) {
-                                    console.log('📦 Using cached data (network unavailable)');
-                                    renderBanner(lang, data);
-                                    isFetching = false;
-                                    return;
-                                }
-                            }
-                        } catch (_) {}
-                        // No data at all
-                        renderBanner(lang, null);
-                        isFetching = false;
-                        return;
-                    }
-                }
-
-                // Store successful fetch in cache for offline use
-                if (json) {
+                    // ذخیره در کش برای مواقع آفلاین
                     localStorage.setItem('banner-cache', JSON.stringify(json));
-                    console.log('✅ Successfully fetched from:', usedUrl);
+
                     const data = json[lang] || json.en;
                     renderBanner(lang, data);
-                } else {
+
+                } catch (err) {
+                    console.warn('خطا در دریافت از GitHub:', err);
+                    
+                    // fallback: استفاده از کش
+                    try {
+                        const cached = localStorage.getItem('banner-cache');
+                        if (cached) {
+                            const parsed = JSON.parse(cached);
+                            const data = parsed[lang] || parsed.en;
+                            if (data) {
+                                renderBanner(lang, data);
+                                isFetching = false;
+                                return;
+                            }
+                        }
+                    } catch (_) {}
+                    
                     renderBanner(lang, null);
                 }
 
