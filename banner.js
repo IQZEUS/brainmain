@@ -11,7 +11,7 @@ window.BANNER_DATA = {
     }
   },
   "fa": {
-    "title": "📢 نسخه جدید میاتشر شد",
+    "title": "📢 نسخه جدید میانتشر شد",
     "sub": "مغز ابدی",
     "image": "https://cdn.schoolspecialty.com/56f76621-1f51-4a5b-9111-b0f1002a7860/586282_JPG%20Output.jpg",
     "content": "باذابذذبذ",
