@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-<title>مغز دوم · گراف کامل</title>
+<title>مغز دوم · دستیار محلی</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js">
 </script>
 <style>
-  /* ===== همه‌ی استایل‌های قبلی ===== */
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Vazirmatn:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
   :root {
@@ -38,7 +37,6 @@
     --glass-shadow: 0 30px 80px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
 
-  /* ===== reset ===== */
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; font-family: var(--font); font-size: 15px; overflow: hidden; }
   body {
@@ -53,7 +51,7 @@
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-  /* loading ... (همون) */
+  /* ===== LOADING ===== */
   #loadingScreen {
     position: fixed; inset: 0; z-index: 9999;
     background: var(--bg);
@@ -84,7 +82,7 @@
     backdrop-filter: blur(6px);
   }
 
-  /* ===== topbar ===== */
+  /* ===== TOPBAR ===== */
   .topbar {
     display: flex; align-items: center; gap: 14px;
     padding: 12px 24px;
@@ -135,10 +133,10 @@
     box-shadow: 0 6px 20px rgba(214,163,92,0.25);
   }
 
-  /* ===== layout ===== */
+  /* ===== LAYOUT ===== */
   .layout { flex: 1; display: flex; min-height: 0; }
 
-  /* ===== sidebar ===== */
+  /* ===== SIDEBAR ===== */
   .sidebar {
     width: 280px; flex-shrink: 0;
     background: var(--surface);
@@ -181,7 +179,7 @@
   .backup-btn:hover { border-color: var(--accent-dim); color: var(--text); background: rgba(255,255,255,0.06); }
   .file-input-hidden { display: none; }
 
-  /* ===== note list ===== */
+  /* ===== NOTE LIST ===== */
   .note-list-wrap { flex: 1; overflow-y: auto; padding: 4px 8px 8px; min-height: 0; }
   .note-list-wrap .list-title {
     font-size: 11px; color: var(--text-faint);
@@ -216,7 +214,7 @@
   }
   .empty-hint { padding: 30px 18px; text-align: center; color: var(--text-faint); font-size: 12.5px; line-height: 1.8; }
 
-  /* ===== tags ===== */
+  /* ===== TAGS ===== */
   .tags-section {
     flex-shrink: 0;
     border-top: 1px solid var(--border-glass);
@@ -255,7 +253,7 @@
     box-shadow: 0 4px 14px rgba(214,163,92,0.3);
   }
 
-  /* ===== editor ===== */
+  /* ===== EDITOR ===== */
   .main { flex: 1; display: flex; min-width: 0; min-height: 0; padding: 8px; }
   .editor-pane {
     flex: 1; display: flex; flex-direction: column; min-width: 0;
@@ -420,7 +418,7 @@
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
 
-  /* ===== tag panel ===== */
+  /* ===== TAG PANEL ===== */
   .tag-panel {
     border-top: 1px solid var(--border-glass);
     background: rgba(255,255,255,0.015);
@@ -490,7 +488,7 @@
   }
   .tag-panel .suggest-chip:hover { background: rgba(255,255,255,0.05); transform: translateY(-1px); }
 
-  /* ===== right panel ===== */
+  /* ===== RIGHT PANEL ===== */
   .rightpanel {
     width: 250px; flex-shrink: 0;
     background: var(--surface-2); backdrop-filter: blur(12px);
@@ -532,7 +530,7 @@
   }
   .insight-row b { color: var(--text); font-family: var(--mono); font-weight: 500; }
 
-  /* ===== graph ===== */
+  /* ===== GRAPH ===== */
   .graph-pane { position: relative; flex: 1; background: transparent; padding: 8px; }
   svg.graph {
     width: 100%; height: 100%; display: block;
@@ -565,7 +563,7 @@
   .graph-legend .lg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
   .graph-legend .lg-diamond { width: 8px; height: 8px; transform: rotate(45deg); flex-shrink: 0; border: 1.4px solid #9382d6; background: transparent; }
 
-  /* ===== chat ===== */
+  /* ===== CHAT (دستیار محلی) ===== */
   .chat-pane {
     flex: 1; display: flex; flex-direction: column; min-height: 0;
     background: linear-gradient(180deg, rgba(30,30,42,0.9), rgba(18,18,26,0.92));
@@ -596,7 +594,10 @@
     background: linear-gradient(135deg, #f2ede0, #d6a35c);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .chat-head .sub { font-size: 11.5px; color: var(--text-faint); margin-inline-start: auto; }
+  .chat-head .sub {
+    font-size: 11.5px; color: var(--text-faint);
+    margin-inline-start: auto;
+  }
   .chat-clear {
     background: rgba(255,255,255,0.03); backdrop-filter: blur(4px);
     border: 1px solid var(--border-glass);
@@ -605,30 +606,6 @@
     cursor: pointer; font-family: inherit; transition: 0.2s;
   }
   .chat-clear:hover { border-color: var(--danger); color: var(--danger); }
-  .chat-settings {
-    display: flex; align-items: center; gap: 10px;
-    flex-wrap: wrap; padding: 12px 24px;
-    border-bottom: 1px solid var(--border-glass);
-    flex-shrink: 0; font-size: 12px; color: var(--text-dim);
-    background: rgba(255,255,255,0.01);
-    position: relative; z-index: 1;
-  }
-  .chat-settings select, .chat-settings input {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border-glass);
-    color: var(--text);
-    border-radius: var(--radius-pill);
-    padding: 6px 14px; font-size: 12px; font-family: inherit;
-    backdrop-filter: blur(4px);
-  }
-  .chat-settings .ollama-note {
-    flex-basis: 100%; font-size: 11px; color: var(--text-faint); line-height: 1.7;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border-glass);
-    border-radius: var(--radius-sm);
-    padding: 10px 16px; backdrop-filter: blur(4px);
-  }
-  .chat-settings .ollama-note code { color: var(--accent); font-family: var(--mono); }
   .chat-messages {
     flex: 1; overflow-y: auto; padding: 24px 28px;
     display: flex; flex-direction: column; gap: 16px;
@@ -658,6 +635,15 @@
     background: rgba(207,111,111,0.1);
     border: 1px solid rgba(207,111,111,0.2);
     color: var(--danger);
+  }
+  .bubble.info {
+    align-self: center;
+    background: rgba(147,130,214,0.08);
+    border: 1px solid rgba(147,130,214,0.15);
+    color: var(--violet-light);
+    font-size: 13px;
+    text-align: center;
+    max-width: 90%;
   }
   .chat-empty {
     color: var(--text-faint); font-size: 13px; text-align: center; margin: auto; line-height: 2;
@@ -699,7 +685,7 @@
   .typing-dots span:nth-child(3) { animation-delay: .4s; }
   @keyframes blink { 0%,80%,100% { opacity: .25; } 40% { opacity: 1; } }
 
-  /* ===== modal & toast ===== */
+  /* ===== MODAL & TOAST ===== */
   .modal-backdrop {
     position: fixed; inset: 0; z-index: 700;
     background: rgba(8,8,12,0.7); backdrop-filter: blur(8px);
@@ -757,7 +743,7 @@
   .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
   .toast.error { border-color: rgba(207,111,111,0.3); color: var(--danger); }
 
-  /* ===== md toolbar ===== */
+  /* ===== MD TOOLBAR ===== */
   .md-toolbar {
     display: flex; gap: 4px;
     padding: 8px 24px;
@@ -778,7 +764,7 @@
   }
   .md-tbtn:hover { border-color: var(--accent-dim); color: var(--text); background: rgba(255,255,255,0.04); }
 
-  /* ===== mobile overrides ===== */
+  /* ===== MOBILE ===== */
   .hamburger {
     display: none;
     background: rgba(255,255,255,0.03); backdrop-filter: blur(4px);
@@ -835,103 +821,36 @@
   body.is-mobile .editor-body { padding: 14px; }
   body.is-mobile .editor-toolbar { padding: 8px 12px; flex-wrap: wrap; gap: 4px; }
   body.is-mobile .title-input { font-size: 16px; }
+  body.is-mobile .tag-panel { padding: 8px 12px; gap: 6px; min-height: 44px; }
+  body.is-mobile .tag-panel .tag-input { width: 90px; font-size: 11px; padding: 4px 12px; }
+  body.is-mobile .tag-panel .tag-add-btn { font-size: 11px; padding: 4px 14px; }
   body.is-mobile .chat-pane { margin: 4px; border-radius: var(--radius-sm); }
   body.is-mobile .chat-messages { padding: 14px; }
   body.is-mobile .chat-inputrow { padding: 10px 14px; }
   body.is-mobile .chat-head { padding: 8px 14px; flex-wrap: wrap; }
-  body.is-mobile .chat-settings { padding: 6px 14px; }
   body.is-mobile .bubble { max-width: 88%; font-size: 13px; padding: 10px 14px; }
   body.is-mobile .graph-hint { font-size: 9px; padding: 4px 12px; bottom: 12px; }
   body.is-mobile .graph-legend { padding: 6px 10px; font-size: 9px; top: 12px; left: 12px; gap: 4px; }
   body.is-mobile .empty-hint { padding: 20px 12px; font-size: 11px; }
-
-  /* ===== بخش تگ‌ها در موبایل ===== */
-  body.is-mobile .tags-section {
-    max-height: 100px !important;
-    background: rgba(0,0,0,0.3);
-  }
-  body.is-mobile .tags-header {
-    padding: 6px 12px !important;
-    font-size: 10px !important;
-  }
-  body.is-mobile .tags-body {
-    padding: 4px 8px 6px !important;
-    gap: 4px !important;
-  }
-  body.is-mobile .tag-chip {
-    font-size: 8.5px !important;
-    padding: 2px 8px !important;
-    border-radius: 30px !important;
-    background: rgba(111,179,160,0.08) !important;
-    border-color: rgba(111,179,160,0.15) !important;
-  }
-  body.is-mobile .tag-chip.active {
-    background: var(--accent-gradient) !important;
-    color: #14140f !important;
-    border-color: var(--accent) !important;
-    box-shadow: 0 2px 8px rgba(214,163,92,0.2) !important;
-  }
-
-  /* ===== پنل افزودن تگ در موبایل ===== */
-  body.is-mobile .tag-panel {
-    padding: 6px 10px !important;
-    gap: 4px !important;
-    min-height: 38px !important;
-  }
-  body.is-mobile .tag-panel .lbl {
-    font-size: 9px !important;
-  }
-  body.is-mobile .tag-panel .tag-pills {
-    gap: 3px !important;
-  }
-  body.is-mobile .tag-panel .note-tag-pill {
-    font-size: 9px !important;
-    padding: 2px 4px 2px 8px !important;
-    gap: 3px !important;
-  }
-  body.is-mobile .tag-panel .note-tag-pill .x {
-    font-size: 8px !important;
-  }
-  body.is-mobile .tag-panel .tag-input-wrap {
-    gap: 3px !important;
-  }
-  body.is-mobile .tag-panel .tag-input {
-    font-size: 10px !important;
-    padding: 3px 10px !important;
-    width: 60px !important;
-    min-height: 26px !important;
-  }
-  body.is-mobile .tag-panel .tag-add-btn {
-    font-size: 10px !important;
-    padding: 3px 12px !important;
-    min-height: 26px !important;
-  }
-  body.is-mobile .tag-panel .tag-suggest {
-    min-width: 160px !important;
-    max-height: 140px !important;
-  }
-  body.is-mobile .tag-panel .tag-suggest-item {
-    font-size: 10px !important;
-    padding: 4px 8px !important;
-    gap: 6px !important;
-  }
-  body.is-mobile .tag-panel .tag-suggest-item .dot {
-    width: 6px !important;
-    height: 6px !important;
-  }
-  body.is-mobile .tag-panel .tag-suggest-item .cnt {
-    font-size: 8px !important;
-  }
-  body.is-mobile .tag-panel .suggest-strip {
-    gap: 3px !important;
-    margin-right: 3px !important;
-  }
-  body.is-mobile .tag-panel .suggest-chip {
-    font-size: 8px !important;
-    padding: 1px 8px !important;
-  }
-
-  /* بقیه‌ی استایل‌های موبایل */
+  body.is-mobile .tags-section { max-height: 100px !important; background: rgba(0,0,0,0.3); }
+  body.is-mobile .tags-header { padding: 6px 12px !important; font-size: 10px !important; }
+  body.is-mobile .tags-body { padding: 4px 8px 6px !important; gap: 4px !important; }
+  body.is-mobile .tag-chip { font-size: 8.5px !important; padding: 2px 8px !important; border-radius: 30px !important; background: rgba(111,179,160,0.08) !important; border-color: rgba(111,179,160,0.15) !important; }
+  body.is-mobile .tag-chip.active { background: var(--accent-gradient) !important; color: #14140f !important; border-color: var(--accent) !important; box-shadow: 0 2px 8px rgba(214,163,92,0.2) !important; }
+  body.is-mobile .tag-panel { padding: 6px 10px !important; gap: 4px !important; min-height: 38px !important; }
+  body.is-mobile .tag-panel .lbl { font-size: 9px !important; }
+  body.is-mobile .tag-panel .tag-pills { gap: 3px !important; }
+  body.is-mobile .tag-panel .note-tag-pill { font-size: 9px !important; padding: 2px 4px 2px 8px !important; gap: 3px !important; }
+  body.is-mobile .tag-panel .note-tag-pill .x { font-size: 8px !important; }
+  body.is-mobile .tag-panel .tag-input-wrap { gap: 3px !important; }
+  body.is-mobile .tag-panel .tag-input { font-size: 10px !important; padding: 3px 10px !important; width: 60px !important; min-height: 26px !important; }
+  body.is-mobile .tag-panel .tag-add-btn { font-size: 10px !important; padding: 3px 12px !important; min-height: 26px !important; }
+  body.is-mobile .tag-panel .tag-suggest { min-width: 160px !important; max-height: 140px !important; }
+  body.is-mobile .tag-panel .tag-suggest-item { font-size: 10px !important; padding: 4px 8px !important; gap: 6px !important; }
+  body.is-mobile .tag-panel .tag-suggest-item .dot { width: 6px !important; height: 6px !important; }
+  body.is-mobile .tag-panel .tag-suggest-item .cnt { font-size: 8px !important; }
+  body.is-mobile .tag-panel .suggest-strip { gap: 3px !important; margin-right: 3px !important; }
+  body.is-mobile .tag-panel .suggest-chip { font-size: 8px !important; padding: 1px 8px !important; }
   body.is-mobile .main { padding: 4px; }
   body.is-mobile .rightpanel { width: auto; }
   body.is-mobile .mode-toggle button { font-size: 10px; padding: 4px 12px; }
@@ -985,7 +904,7 @@
     <div class="brand">
       <span class="dot"></span>
       مغز دوم
-      <span class="pill-badge">نسخه ۳ · گراف کامل</span>
+      <span class="pill-badge">نسخه ۴ · دستیار محلی</span>
     </div>
     <div class="viewbtns">
       <button class="viewbtn active" id="btn-notes">یادداشت‌ها</button>
@@ -1039,33 +958,16 @@
       <div class="graph-hint">اسکرول = زوم · درگ کن، هاور کن، کلیک کن</div>
     </div>
 
-    <!-- chat -->
+    <!-- chat (دستیار محلی) -->
     <div class="chat-pane" id="mainChat" style="display:none;">
       <div class="chat-head">
         <div class="ttl">دستیار هوشمند</div>
         <div class="sub" id="chatSub">بر اساس یادداشت‌های تو جواب می‌ده</div>
         <button class="chat-clear" id="chatClearBtn">پاک کردن گفتگو</button>
       </div>
-      <div class="chat-settings" id="chatSettingsRow">
-        <span>منبع دستیار:</span>
-        <select id="providerSelect">
-          <option value="claude">Claude (آنلاین)</option>
-          <option value="ollama">مدل محلی — Ollama (آفلاین)</option>
-        </select>
-        <span id="claudeFields" style="display:none;align-items:center;gap:8px;">
-          <input id="claudeKeyInput" type="password" placeholder="کلید API" style="width:190px;">
-          <input id="claudeUrlInput" placeholder="آدرس سرور" style="width:190px;">
-        </span>
-        <span id="ollamaFields" style="display:none;align-items:center;gap:8px;">
-          <input id="ollamaModelInput" placeholder="نام مدل" style="width:190px;">
-          <input id="ollamaUrlInput" placeholder="آدرس سرور" style="width:170px;">
-        </span>
-        <div class="ollama-note" id="claudeNote" style="display:none;">کلید API از console.anthropic.com</div>
-        <div class="ollama-note" id="ollamaNote" style="display:none;">OLLAMA_ORIGINS=* ollama serve</div>
-      </div>
       <div class="chat-messages" id="chatMessages"></div>
       <div class="chat-inputrow">
-        <input class="chat-input" id="chatInput" placeholder="یه سوال درباره یادداشت‌هات بپرس…">
+        <input class="chat-input" id="chatInput" placeholder="سوالی درباره یادداشت‌هات بپرس…">
         <button class="chat-send" id="chatSendBtn">پرسیدن</button>
       </div>
     </div>
@@ -1079,7 +981,6 @@
       // CONSTANTS
       // ============================================================
       const STORAGE_KEY = 'second-brain-notes-v1';
-      const SETTINGS_KEY = 'second-brain-settings-v1';
 
       let notes = {};
       let currentId = null;
@@ -1127,16 +1028,6 @@
         saveTimer = setTimeout(async () => {
           try { await storageSet(STORAGE_KEY, JSON.stringify(notes)); } catch (_) {}
         }, 250);
-      }
-
-      function saveSettings() {
-        storageSet(SETTINGS_KEY, JSON.stringify({
-          chatProvider,
-          claudeApiKey,
-          claudeBaseUrl,
-          ollamaModel,
-          ollamaUrl
-        })).catch(() => {});
       }
 
       // ============================================================
@@ -1741,7 +1632,7 @@
       }
 
       // ============================================================
-      // GRAPH (بدون محدودیت، با زوم هوشمند)
+      // GRAPH (بدون محدودیت)
       // ============================================================
       function renderGraph() {
         const svg = d3.select('#graphSvg');
@@ -1929,7 +1820,6 @@
           nodeG.attr('transform', d => `translate(${d.x},${d.y})`);
         });
 
-        // ===== زوم هوشمند =====
         const zoom = d3.zoom()
           .scaleExtent([0.4, 3])
           .on('zoom', (event) => {
@@ -1953,61 +1843,121 @@
       }
 
       // ============================================================
-      // CHAT (همون)
       // ============================================================
-      let chatApiHistory = [];
+      // دستیار هوشمند محلی (بدون API)
+      // ============================================================
+      // ============================================================
+
+      // ۱. استخراج کلمات کلیدی از متن
+      function extractKeywords(text) {
+        const stopWords = ['و', 'به', 'از', 'برای', 'که', 'این', 'با', 'را', 'در', 'یک', 'نیست', 'می‌شه', 'رو', 'های', 'ها',
+          'یا', 'تا', 'بر', 'نظر', 'مثل', 'هم', 'اما', 'اگر', 'چه', 'چون', 'که', 'همان', 'همین', 'خود', 'باید', 'شاید', 'مگر',
+          'نه', 'نیز', 'همچنین', 'بنابراین', 'ولی', 'پس', 'زیرا', 'چرا', 'چطور', 'کجا', 'کی', 'چند', 'چقدر', 'کدام'
+        ];
+        const words = text.replace(/[،؛؟!.\-،]/g, ' ').split(/\s+/);
+        return words
+          .map(w => w.trim())
+          .filter(w => w.length > 1 && !stopWords.includes(w))
+          .map(w => w.toLowerCase());
+      }
+
+      // ۲. محاسبه تشابه بین دو متن (Jaccard)
+      function calculateSimilarity(text1, text2) {
+        const words1 = new Set(extractKeywords(text1));
+        const words2 = new Set(extractKeywords(text2));
+        if (words1.size === 0 || words2.size === 0) return 0;
+        const intersection = new Set([...words1].filter(w => words2.has(w)));
+        const union = new Set([...words1, ...words2]);
+        return intersection.size / union.size;
+      }
+
+      // ۳. جستجو در یادداشت‌ها
+      function searchNotes(query) {
+        const queryWords = extractKeywords(query);
+        if (!queryWords.length) return [];
+
+        const results = Object.values(notes).map(note => {
+          const noteText = note.title + ' ' + note.content;
+          const similarity = calculateSimilarity(query, noteText);
+          const tags = extractTags(note.content);
+          const tagMatch = tags.some(t => queryWords.some(q => t.includes(q) || q.includes(t)));
+
+          let score = similarity * 100;
+          if (tagMatch) score += 15;
+          // امتیاز اضافی برای تطابق عنوان
+          const titleWords = extractKeywords(note.title);
+          const titleMatch = titleWords.some(w => queryWords.includes(w));
+          if (titleMatch) score += 10;
+
+          return {
+            note,
+            score: Math.round(score * 100) / 100,
+            matchedWords: queryWords.filter(w => noteText.toLowerCase().includes(w))
+          };
+        });
+
+        return results
+          .filter(r => r.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 5);
+      }
+
+      // ۴. تولید پاسخ نهایی
+      function generateAnswer(query) {
+        const results = searchNotes(query);
+
+        if (!results.length) {
+          return {
+            found: false,
+            message: '🔍 اطلاعاتی در مورد سوال شما در یادداشت‌ها پیدا نشد.\n\nلطفاً سوال خود را دقیق‌تر بپرسید یا درباره‌ی این موضوع یادداشت جدیدی بنویسید.'
+          };
+        }
+
+        const best = results[0];
+        const others = results.slice(1, 3);
+
+        let answer = `📌 **${best.note.title}**\n\n`;
+        answer += best.note.content.slice(0, 350) + (best.note.content.length > 350 ? '...' : '');
+        answer += `\n\n🔹 **امتیاز شباهت:** ${best.score}%`;
+
+        if (others.length) {
+          answer += '\n\n📎 **یادداشت‌های مرتبط دیگر:**\n';
+          others.forEach(r => {
+            answer += `- ${r.note.title} (${r.score}% شباهت)\n`;
+          });
+        }
+
+        return {
+          found: true,
+          message: answer
+        };
+      }
+
+      // ============================================================
+      // CHAT (دستیار محلی)
+      // ============================================================
       let chatDisplay = [];
       let chatBusy = false;
-      let chatProvider = 'claude';
-      let claudeApiKey = '';
-      let claudeBaseUrl = 'https://api.anthropic.com';
-      let ollamaModel = 'qwen2.5-coder';
-      let ollamaUrl = 'http://localhost:11434';
-
-      async function loadSettings() {
-        try {
-          const val = await storageGet(SETTINGS_KEY);
-          if (val) {
-            const s = JSON.parse(val);
-            chatProvider = s.chatProvider || 'claude';
-            claudeApiKey = s.claudeApiKey || '';
-            claudeBaseUrl = s.claudeBaseUrl || 'https://api.anthropic.com';
-            ollamaModel = s.ollamaModel || 'qwen2.5-coder';
-            ollamaUrl = s.ollamaUrl || 'http://localhost:11434';
-          }
-        } catch (_) {}
-      }
-
-      function buildNotesContext() {
-        const list = Object.values(notes).sort((a, b) => b.updatedAt - a.updatedAt);
-        let out = '';
-        const BUDGET = 9000;
-        for (const n of list) {
-          const tags = extractTags(n.content);
-          const block =
-            `## ${n.title}\n${n.content || '(خالی)'}${tags.length? '\nتگ‌ها: '+tags.map(t=>'#'+t).join(' ') : ''}\n\n`;
-          if (out.length + block.length > BUDGET) break;
-          out += block;
-        }
-        return out;
-      }
 
       function renderChat() {
         const box = document.getElementById('chatMessages');
-        document.getElementById('chatSub').textContent = chatProvider === 'ollama' ?
-          `آفلاین · مدل محلی «${ollamaModel}» · ${Object.keys(notes).length} یادداشت` :
-          `بر اساس ${Object.keys(notes).length} یادداشت جواب می‌ده`;
+        document.getElementById('chatSub').textContent =
+          `${Object.keys(notes).length} یادداشت · جستجوی محلی`;
+
         if (!chatDisplay.length) {
           box.innerHTML =
-            `<div class="chat-empty">هر سوالی درباره یادداشت‌هات بپرس —<br>مثلاً «خلاصه‌ای از پروژه‌هام بده» یا «چه ارتباطی بین ایده‌ها هست؟»</div>`;
+            `<div class="chat-empty">سوالی درباره یادداشت‌هات بپرس —<br>مثلاً «خلاصه پروژه‌ها» یا «چه ایده‌هایی دارم؟»</div>`;
           return;
         }
+
         box.innerHTML = chatDisplay.map(m => {
           if (m.role === 'user') return `<div class="bubble user">${escapeHtml(m.text)}</div>`;
-          if (m.role === 'error') return `<div class="bubble error">${escapeHtml(m.text)}</div>`;
+          if (m.role === 'assistant') return `<div class="bubble assistant">${renderMarkdown(m.text)}</div>`;
+          if (m.role === 'info') return `<div class="bubble info">${escapeHtml(m.text)}</div>`;
           if (m.role === 'typing') return `<div class="bubble assistant typing-dots"><span></span><span></span><span></span></div>`;
-          return `<div class="bubble assistant">${renderMarkdown(m.text)}</div>`;
+          return '';
         }).join('');
+
         box.querySelectorAll('.bubble.assistant a.wikilink').forEach(a => {
           a.addEventListener('click', (e) => {
             e.preventDefault();
@@ -2017,135 +1967,50 @@
               showNotes(); }
           });
         });
+
         box.scrollTop = box.scrollHeight;
       }
 
-      async function sendChat() {
+      function sendChat() {
         if (chatBusy) return;
         const input = document.getElementById('chatInput');
         const question = input.value.trim();
         if (!question) return;
         input.value = '';
 
-        if (chatApiHistory.length === 0) {
-          const ctx = buildNotesContext();
-          const sys =
-            `تو دستیار هوشمند داخل اپلیکیشن یادداشت‌برداری شخصی به اسم «مغز دوم» هستی. زیر، همه یادداشت‌های کاربر رو می‌بینی. بر اساس همین یادداشت‌ها به فارسی، دقیق و مختصر جواب بده. اگه به یادداشتی اشاره می‌کنی، اسمش رو داخل [[دو کروشه]] بنویس تا قابل کلیک بشه. اگه جواب داخل یادداشت‌ها نیست، صادقانه بگو که تو یادداشت‌ها پیدا نشد و در صورت امکان یه پاسخ کلی بده.\n\n--- یادداشت‌های کاربر ---\n${ctx || '(هنوز یادداشتی وجود نداره)'}`;
-          chatApiHistory.push({ role: 'user', content: sys + '\n\n--- سوال کاربر ---\n' + question });
-        } else {
-          chatApiHistory.push({ role: 'user', content: question });
-        }
         chatDisplay.push({ role: 'user', text: question });
         chatDisplay.push({ role: 'typing' });
         chatBusy = true;
         document.getElementById('chatSendBtn').disabled = true;
         renderChat();
 
-        try {
-          let text = '';
-          if (chatProvider === 'ollama') {
-            const base = (ollamaUrl || 'http://localhost:11434').replace(/\/$/, '');
-            const response = await fetch(base + '/api/chat', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                model: ollamaModel || 'qwen2.5-coder',
-                messages: chatApiHistory,
-                stream: false
-              })
-            });
-            if (!response.ok) throw new Error('ollama-http-' + response.status);
-            const data = await response.json();
-            text = (data && data.message && data.message.content) ? data.message.content.trim() : '';
-            chatDisplay.pop();
-            chatApiHistory.push({ role: 'assistant', content: text });
-            chatDisplay.push({ role: 'assistant', text: text || 'جوابی دریافت نشد.' });
+        // شبیه‌سازی تأخیر کوتاه برای طبیعی‌تر شدن
+        setTimeout(() => {
+          const result = generateAnswer(question);
+
+          chatDisplay.pop(); // حذف تایپینگ
+          if (result.found) {
+            chatDisplay.push({ role: 'assistant', text: result.message });
           } else {
-            const base = (claudeBaseUrl || 'https://api.anthropic.com').replace(/\/$/, '');
-            const headers = { 'Content-Type': 'application/json' };
-            if (claudeApiKey.trim()) {
-              headers['x-api-key'] = claudeApiKey.trim();
-              headers['anthropic-version'] = '2023-06-01';
-              if (base.includes('api.anthropic.com')) headers['anthropic-dangerous-direct-browser-access'] = 'true';
-              headers['Authorization'] = 'Bearer ' + claudeApiKey.trim();
-            }
-            const response = await fetch(base + '/v1/messages', {
-              method: 'POST',
-              headers,
-              body: JSON.stringify({
-                model: 'claude-sonnet-4-6',
-                max_tokens: 1000,
-                messages: chatApiHistory
-              })
-            });
-            const data = await response.json();
-            chatDisplay.pop();
-            if (data && data.content) {
-              text = data.content.map(b => b.type === 'text' ? b.text : '').join('\n').trim();
-              chatApiHistory.push({ role: 'assistant', content: text });
-              chatDisplay.push({ role: 'assistant', text: text || 'جوابی دریافت نشد.' });
-            } else if (data && data.error) {
-              chatDisplay.push({ role: 'error', text: 'خطا: ' + (data.error.message || 'نامشخص') + (claudeApiKey
-                  .trim() ? '' :
-                  ' — احتمالاً این فایل بیرون از چت کلود بازه؛ کلید API رو بالا وارد کن.') });
-            } else {
-              chatDisplay.push({ role: 'error', text: 'مشکلی در دریافت پاسخ پیش اومد. دوباره امتحان کن.' });
-            }
+            chatDisplay.push({ role: 'info', text: result.message });
           }
-        } catch (e) {
-          chatDisplay.pop();
-          if (chatProvider === 'ollama') {
-            chatDisplay.push({ role: 'error',
-              text: 'اتصال به Ollama ناموفق بود. مطمئن شو با دستور "OLLAMA_ORIGINS=* ollama serve" در حال اجراست، مدلش دانلود شده، و آدرس/نام مدل بالا درسته.' });
-          } else {
-            chatDisplay.push({ role: 'error', text: 'اتصال به دستیار ناموفق بود. دوباره امتحان کن.' });
-          }
-        }
-        chatBusy = false;
-        document.getElementById('chatSendBtn').disabled = false;
-        renderChat();
+
+          chatBusy = false;
+          document.getElementById('chatSendBtn').disabled = false;
+          renderChat();
+        }, 300 + Math.random() * 400);
       }
 
       document.getElementById('chatSendBtn').addEventListener('click', sendChat);
-      document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+      document.getElementById('chatInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') sendChat();
+      });
+
       document.getElementById('chatClearBtn').addEventListener('click', () => {
-        chatApiHistory = [];
         chatDisplay = [];
         renderChat();
+        showToast('گفتگو پاک شد.');
       });
-
-      function applyProviderUI() {
-        const isOllama = chatProvider === 'ollama';
-        document.getElementById('ollamaFields').style.display = isOllama ? 'inline-flex' : 'none';
-        document.getElementById('ollamaNote').style.display = isOllama ? 'block' : 'none';
-        document.getElementById('claudeFields').style.display = isOllama ? 'none' : 'inline-flex';
-        document.getElementById('claudeNote').style.display = isOllama ? 'none' : 'block';
-        document.getElementById('providerSelect').value = chatProvider;
-        document.getElementById('ollamaModelInput').value = ollamaModel;
-        document.getElementById('ollamaUrlInput').value = ollamaUrl;
-        document.getElementById('claudeKeyInput').value = claudeApiKey;
-        document.getElementById('claudeUrlInput').value = claudeBaseUrl;
-      }
-
-      document.getElementById('providerSelect').addEventListener('change', e => {
-        chatProvider = e.target.value;
-        chatApiHistory = [];
-        chatDisplay = [];
-        applyProviderUI();
-        saveSettings();
-        renderChat();
-      });
-      document.getElementById('ollamaModelInput').addEventListener('change', e => { ollamaModel = e.target.value.trim() ||
-          'qwen2.5-coder';
-        saveSettings(); });
-      document.getElementById('ollamaUrlInput').addEventListener('change', e => { ollamaUrl = e.target.value.trim() ||
-          'http://localhost:11434';
-        saveSettings(); });
-      document.getElementById('claudeKeyInput').addEventListener('change', e => { claudeApiKey = e.target.value.trim();
-        saveSettings(); });
-      document.getElementById('claudeUrlInput').addEventListener('change', e => { claudeBaseUrl = e.target.value.trim() ||
-          'https://api.anthropic.com';
-        saveSettings(); });
 
       // ============================================================
       // VIEW SWITCHING
@@ -2219,6 +2084,7 @@
         a.remove();
         URL.revokeObjectURL(url);
       });
+
       document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
       document.getElementById('importFile').addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -2311,9 +2177,7 @@
       // LOADING
       // ============================================================
       function runLoadingMessages() {
-        const msgs = ['در حال بیدار شدن مغز دوم…', 'بارگذاری یادداشت‌ها…', 'ساخت ارتباط بین ایده‌ها…', 'آماده‌سازی گراف دانش…',
-          'چیدن آخرین تکه‌ها…'
-        ];
+        const msgs = ['در حال بیدار شدن مغز دوم…', 'بارگذاری یادداشت‌ها…', 'آماده‌سازی دستیار محلی…', 'همه چیز آماده‌ست…'];
         const el = document.getElementById('loadMsg');
         let i = 0;
         el.textContent = msgs[0];
@@ -2322,7 +2186,7 @@
           el.style.opacity = 0;
           setTimeout(() => { el.textContent = msgs[i];
             el.style.opacity = 1; }, 200);
-        }, 750);
+        }, 700);
       }
 
       function hideLoadingScreen() {
@@ -2338,14 +2202,18 @@
         applyDeviceMode();
         const start = Date.now();
         await loadNotes();
-        await loadSettings();
-        applyProviderUI();
         render();
+        // یک پیام خوش‌آمدگویی در چت
+        chatDisplay.push({
+          role: 'info',
+          text: '👋 سلام! من دستیار هوشمند مغز دوم هستم. هر سوالی درباره یادداشت‌هات داری بپرس.'
+        });
         const elapsed = Date.now() - start;
-        const minShow = 1200;
+        const minShow = 1000;
         setTimeout(() => {
           clearInterval(loadingMsgTimer);
           hideLoadingScreen();
+          renderChat();
         }, Math.max(0, minShow - elapsed));
       })();
 
