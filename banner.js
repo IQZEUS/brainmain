@@ -17,7 +17,7 @@ window.BANNER_DATA = {
     "content": "باذابذذبذ",
     "html": "<div style=\"display:flex;flex-direction:column;align-items:center;gap:10px;\"><img src=\"https://salamdonya.com/assets/images/53/5375odb2t.jpg\" alt=\"banner\" style=\"max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;\"><div style=\"color:#c9c6bd;font-size:14px;line-height:1.8;\">باذابذذبذ</div></div>",
     "button": {
-      "label": "📥 دانلود نسخه جدید jj",
+      "label": "📥 دانلود نسخه جدیدjjj",
       "link": "https://github.com/IQZEUS/brainmain000000"
     }
   }
